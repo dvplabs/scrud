@@ -8,36 +8,55 @@ import com.google.testing.compile.Compilation;
 import static com.google.testing.compile.CompilationSubject.assertThat;
 import static com.google.testing.compile.Compiler.javac;
 import com.google.testing.compile.JavaFileObjects;
-import java.util.Set;
+import java.io.File;
+import java.util.Arrays;
+import java.util.List;
 import static java.util.stream.Collectors.toList;
 import java.util.stream.Stream;
-import javax.annotation.processing.ProcessingEnvironment;
-import javax.annotation.processing.RoundEnvironment;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
-import static org.mockito.Mockito.when;
-import org.mockito.junit.jupiter.MockitoExtension;
 
 /**
  *
  * @author david
  */
 public class CrudGeneratorTest {
+  private List<File> classPath;
   
+  @BeforeEach
+  void init() {
+    var path = System.getProperty("java.class.path");
+    var separator = System.getProperty("path.separator");
+    classPath = Arrays.stream(path.split(separator))
+        .map(File::new)
+        .collect(toList());
+  }
   
   @Test
-  void generatesControllerForResource() {
-    var files = Stream.of("Mapper.java", "Product.java", "ProductDto.java")
+  void generatesEmptyControllerForResource() {
+    generateController("example/Mapper.java", "expected/EmptyController.java");
+  }
+  
+  void generateController(String mapperPath, String resultPath) {
+    var files = Stream.of(
+          "example/model/Product.java", 
+          "example/dto/ProductDto.java",
+          mapperPath)
         .map(JavaFileObjects::forResource)
         .collect(toList());
+    
     Compilation compilation = javac()
         .withProcessors(new CrudGenerator())
+        .withClasspath(classPath)
         .compile(files);
     
     assertThat(compilation)
-        .generatedSourceFile("io.github.vpdavid.scrud.ProductsCrudController");
+        .generatedSourceFile("example.ProductsCrudController")
+        .hasSourceEquivalentTo(JavaFileObjects.forResource(resultPath));
+  }
+  
+  @Test
+  void generateFullControllerForResource() {
+    generateController("example/FullMapper.java", "expected/FullController.java");
   }
 }
