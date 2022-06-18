@@ -1,7 +1,3 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package io.github.vpdavid.scrud;
 
 import com.google.testing.compile.Compilation;
@@ -21,7 +17,7 @@ import org.junit.jupiter.api.Test;
  * @author david
  */
 public class CrudGeneratorTest {
-  private List<File> classPath;
+  List<File> classPath;
   
   @BeforeEach
   void init() {
@@ -34,7 +30,17 @@ public class CrudGeneratorTest {
   
   @Test
   void generatesEmptyControllerForResource() {
-    generateController("example/Mapper.java", "expected/EmptyController.java");
+    generateController("example/EmptyMapper.java", "expected/EmptyController.java");
+  }
+  
+  @Test
+  void generateFullControllerForResource() {
+    generateController("example/FullMapper.java", "expected/FullController.java");
+  }
+  
+  @Test
+  void generatePartialControllerForResource() {
+    generateController("example/PartialMapper.java", "expected/PartialController.java");
   }
   
   void generateController(String mapperPath, String resultPath) {
@@ -53,10 +59,5 @@ public class CrudGeneratorTest {
     assertThat(compilation)
         .generatedSourceFile("example.ProductsCrudController")
         .hasSourceEquivalentTo(JavaFileObjects.forResource(resultPath));
-  }
-  
-  @Test
-  void generateFullControllerForResource() {
-    generateController("example/FullMapper.java", "expected/FullController.java");
   }
 }

@@ -12,11 +12,11 @@ import java.util.stream.IntStream;
  * @author david
  */
 public enum Method {
-  POST("post.tpl"), 
-  GET("get.tpl"), 
+  GET_ALL("get-all.tpl"),
+  GET("get.tpl"),
+  POST("post.tpl"),
   PUT("put.tpl"), 
-  DELETE("delete.tpl"), 
-  GET_ALL("get-all.tpl");
+  DELETE("delete.tpl");
   
   private final String TEMPLATE_NAME;
   
@@ -24,10 +24,13 @@ public enum Method {
     this.TEMPLATE_NAME = templateName;
   }
   
-  String getSource(int tabulationCount) throws IOException, URISyntaxException {
+  String getSource(int tabulationCount, String modelName, String dtoName) 
+      throws IOException, URISyntaxException {
     var url = getClass().getClassLoader().getResource(TEMPLATE_NAME);
     return Files.lines(Path.of(url.toURI()))
         .map(l -> tabs(tabulationCount) + l)
+        .map(l -> l.replace("${model}", modelName))
+        .map(l -> l.replace("${dto}", dtoName))
         .collect(joining("\n"));
   }
   

@@ -13,7 +13,7 @@ import example.model.Product;
 import example.dto.ProductDto;
 
 @RestController
-@RequestMapping(path = "/v1/products", methods = {})
+@RequestMapping(path = "/v1/products")
 public class ProductsCrudController {
 
   @Autowired

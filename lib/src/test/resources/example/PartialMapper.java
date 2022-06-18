@@ -4,8 +4,8 @@ import example.model.Product;
 import example.dto.ProductDto;
 import io.github.vpdavid.scrud.*;
 
-@Crud(resource = "/v1/products", methods = {})
-public class Mapper implements ResourceMapper<Product, ProductDto> {
+@Crud(resource = "/v1/products", methods = {Method.PUT, Method.GET})
+public class PartialMapper implements ResourceMapper<Product, ProductDto> {
 
   @Override
   public ProductDto toDto(Product model) {

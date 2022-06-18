@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import static java.lang.String.format;
 import java.nio.file.Files;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 import java.util.logging.Level;
@@ -58,6 +59,7 @@ public class CrudGenerator extends AbstractProcessor {
         var packageName = ((PackageElement)el.getEnclosingElement()).getQualifiedName().toString();
         var crudAnnotation = el.getAnnotation(Crud.class);
         
+        var methods = crudAnnotation.methods();
         String name = crudAnnotation.resource();
         var matcher = PATTERN.matcher(name);
         matcher.find();
@@ -77,7 +79,7 @@ public class CrudGenerator extends AbstractProcessor {
         var dto = mirror.get(1).toString();        
         
         var writer = new PrintWriter(file.openWriter());
-        writer.println("package " + packageName + ";\n");
+        writer.println("package " + packageName + ";");
         writer.println("");
         writer.println(COMMOM_IMPORTS);
         writer.println("import " + model + ";");
@@ -86,16 +88,22 @@ public class CrudGenerator extends AbstractProcessor {
         writer.println("@RestController");
         writer.println(format("@RequestMapping(path = \"%s\")", name));
         writer.println(format("public class %sCrudController {", className));
-        writer.println("  @Autowired\n  private EntityManager entityManager;");
-        writer.println(format("  @Autowired\n  private ResourceMapper<%s, %s> mapper;", 
+        writer.write("\t@Autowired\n\tprivate EntityManager entityManager;\n");
+        writer.write(format("\t@Autowired\n\tprivate ResourceMapper<%s, %s> mapper;\n", 
             simpleName(model), simpleName(dto)));
-        content(simpleName(model), simpleName(dto)).forEach(writer::println);
+        
+        for (var method : methods) {
+          var src = method.getSource(1, simpleName(model), simpleName(dto));
+          writer.write(src);
+          writer.write("\n\n");
+        }
+        
         writer.println("}");
         writer.close();
       }
       return true;
     }
-    catch (IOException ex) {
+    catch (Exception ex) {
       processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR, ex.getMessage());
       return false;
     }

@@ -16,11 +16,11 @@ public class MethodTest {
   
   @Test
   void readSource() throws IOException, URISyntaxException {
-    verifyContents(Method.GET, Path.of("src/main/resources/get.tpl"));
-    verifyContents(Method.GET_ALL, Path.of("src/main/resources/get-all.tpl"));
-    verifyContents(Method.POST, Path.of("src/main/resources/post.tpl"));
-    verifyContents(Method.PUT, Path.of("src/main/resources/put.tpl"));
-    verifyContents(Method.DELETE, Path.of("src/main/resources/delete.tpl"));
+    verifyContents(Method.GET, Path.of("src/test/resources/get.txt"));
+    verifyContents(Method.GET_ALL, Path.of("src/test/resources/get-all.txt"));
+    verifyContents(Method.POST, Path.of("src/test/resources/post.txt"));
+    verifyContents(Method.PUT, Path.of("src/test/resources/put.txt"));
+    verifyContents(Method.DELETE, Path.of("src/test/resources/delete.txt"));
   }
   
   void verifyContents(Method method, Path template) throws IOException, URISyntaxException {
@@ -28,7 +28,7 @@ public class MethodTest {
         .map(l -> "\t" + l)
         .collect(Collectors.joining("\n"));
     
-    assertEquals(src, method.getSource(1));
+    assertEquals(src, method.getSource(1, "Product", "ProductDto"));
   }
   
   

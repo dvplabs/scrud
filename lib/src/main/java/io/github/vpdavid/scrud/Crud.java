@@ -6,5 +6,5 @@ package io.github.vpdavid.scrud;
  */
 public @interface Crud {
   String resource();
-  Method[] methods() default {Method.POST, Method.PUT, Method.DELETE, Method.GET, Method.GET_ALL};
+  Method[] methods() default {Method.GET_ALL, Method.GET, Method.POST, Method.PUT, Method.DELETE};
 }
