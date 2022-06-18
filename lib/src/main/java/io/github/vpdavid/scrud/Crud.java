@@ -1,7 +1,3 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package io.github.vpdavid.scrud;
 
 /**
@@ -10,4 +6,5 @@ package io.github.vpdavid.scrud;
  */
 public @interface Crud {
   String resource();
+  Method[] methods() default {Method.POST, Method.PUT, Method.DELETE, Method.GET, Method.GET_ALL};
 }

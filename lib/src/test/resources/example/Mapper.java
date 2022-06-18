@@ -4,7 +4,7 @@ import example.model.Product;
 import example.dto.ProductDto;
 import io.github.vpdavid.scrud.*;
 
-@Crud(resource = "/v1/products")
+@Crud(resource = "/v1/products", methods = {})
 public class Mapper implements ResourceMapper<Product, ProductDto> {
 
   @Override
