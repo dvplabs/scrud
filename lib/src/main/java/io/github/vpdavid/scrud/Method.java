@@ -1,42 +1,57 @@
 package io.github.vpdavid.scrud;
 
-import java.io.IOException;
-import java.net.URISyntaxException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import static java.util.stream.Collectors.joining;
-import java.util.stream.IntStream;
+import static java.util.stream.Collectors.toSet;
+import javax.lang.model.element.Element;
+import javax.lang.model.element.ExecutableElement;
+import lombok.Getter;
+
 
 /**
  *
  * @author david
  */
-public enum Method {
-  GET_ALL("get-all.tpl"),
-  GET("get.tpl"),
-  POST("post.tpl"),
-  PUT("put.tpl"), 
-  DELETE("delete.tpl");
+public class Method {
+
+  private ExecutableElement el;
+  @Getter
+  private TypeName model, dto;
   
-  private final String TEMPLATE_NAME;
-  
-  Method(String templateName) {
-    this.TEMPLATE_NAME = templateName;
+  public Method(Element el, TypeName model, TypeName dto) {
+    if (el instanceof ExecutableElement) {
+      this.el = (ExecutableElement) el;
+    }
+    this.model = model;
+    this.dto = dto;
   }
   
-  String getSource(int tabulationCount, String modelName, String dtoName) 
-      throws IOException, URISyntaxException {
-    var url = getClass().getClassLoader().getResource(TEMPLATE_NAME);
-    return Files.lines(Path.of(url.toURI()))
-        .map(l -> tabs(tabulationCount) + l)
-        .map(l -> l.replace("${model}", modelName))
-        .map(l -> l.replace("${dto}", dtoName))
-        .collect(joining("\n"));
+  boolean validFor(Verb v) {
+    var validReturnType = false;
+    var validParameter = false;
+    
+    if (v == Verb.GET || v == Verb.GET_ALL) {
+      validReturnType = dto.getFullName().equals(el.getReturnType().toString());
+      validParameter = model.getFullName().equals(el.getParameters().get(0).asType().toString());
+    } else if (v == Verb.POST || v == Verb.PUT) {
+      validReturnType = "void".equals(el.getReturnType().toString());
+      var params = el.getParameters().stream()
+          .map(Element::asType)
+          .map(Object::toString)
+          .collect(toSet());
+      validParameter = params.contains(model.getFullName()) && params.contains(dto.getFullName());
+    } if (v == Verb.DELETE) {
+      validReturnType = "void".equals(el.getReturnType().toString());
+      var parms = el.getParameters().stream()
+          .map(Element::asType)
+          .map(Object::toString)
+          .collect(toSet());
+      validParameter = parms.contains(model.getFullName()) && parms.size() == 1;
+    }
+    
+    return validReturnType && validParameter;
   }
   
-  private String tabs(int count) {
-    return IntStream.range(0, count)
-        .mapToObj(i -> "\t")
-        .collect(joining(""));
+  public String getName() {
+    return el.getSimpleName().toString();
   }
+  
 }

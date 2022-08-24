@@ -6,5 +6,7 @@ package io.github.vpdavid.scrud;
  */
 public @interface Crud {
   String resource();
-  Method[] methods() default {Method.GET_ALL, Method.GET, Method.POST, Method.PUT, Method.DELETE};
+  Verb[] verbs() default { Verb.GET_ALL, Verb.GET, Verb.POST, Verb.PUT, Verb.DELETE };
+  Class<?> model();
+  Class<?> dto();
 }

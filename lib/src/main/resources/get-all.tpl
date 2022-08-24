@@ -1,15 +1,15 @@
 @GetMapping
 @ResponseStatus(HttpStatus.OK)
 @Transactional(readOnly = true)
-public Page<${dto}> read(Pageable pageable) {
+public Page<${method.dto.name}> read(Pageable pageable) {
   var cb = entityManager.getCriteriaBuilder();
 
   var cqTotal = cb.createQuery(Long.class);
-  var selectTotal = cqTotal.select(cb.count(cqTotal.from(${model}.class)));
+  var selectTotal = cqTotal.select(cb.count(cqTotal.from(${method.model.name}.class)));
   Long total = entityManager.createQuery(selectTotal).getSingleResult();
 
-  var cq = cb.createQuery(${model}.class);
-  var root = cq.from(${model}.class);
+  var cq = cb.createQuery(${method.model.name}.class);
+  var root = cq.from(${method.model.name}.class);
   cq.select(root);
 
   if (pageable.getSort().isSorted()) {
@@ -27,5 +27,8 @@ public Page<${dto}> read(Pageable pageable) {
   var query = entityManager.createQuery(cq);
   query.setFirstResult(pageable.getPageNumber() * pageable.getPageSize());
   query.setMaxResults(pageable.getPageSize());
-  return new PageImpl(query.getResultList(), pageable, total);
+  var results = query.getResultList().stream()
+    .map(o -> mapper.${method.name}((${method.model.name})o))
+    .collect(Collectors.toList());
+  return new PageImpl(results, pageable, total);
 }

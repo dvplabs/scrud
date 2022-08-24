@@ -1,6 +1,7 @@
-package example;
+package example.output;
 
 import java.util.*;
+import java.util.stream.*;
 import javax.persistence.*;
 import javax.persistence.criteria.Order;
 import org.springframework.beans.factory.annotation.Autowired;

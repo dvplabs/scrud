@@ -1,6 +1,7 @@
-package example;
+package example.input;
 
 import java.util.*;
+import java.util.stream.*;
 import javax.persistence.*;
 import javax.persistence.criteria.Order;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -8,18 +9,17 @@ import org.springframework.data.domain.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
-import io.github.vpdavid.scrud.ResourceMapper;
-import example.model.Product;
-import example.dto.ProductDto;
+import example.input.model.Product;
+import example.input.dto.ProductDto;
 
 @RestController
-@RequestMapping(path = "/v1/products")
+@RequestMapping(path = "/products")
 public class ProductsCrudController {
 
   @Autowired
   private EntityManager entityManager;
   @Autowired
-  private ResourceMapper<Product, ProductDto> mapper;
+  private BasicMapper mapper;
 
   @GetMapping
   @ResponseStatus(HttpStatus.OK)
@@ -50,7 +50,10 @@ public class ProductsCrudController {
     var query = entityManager.createQuery(cq);
     query.setFirstResult(pageable.getPageNumber() * pageable.getPageSize());
     query.setMaxResults(pageable.getPageSize());
-    return new PageImpl(query.getResultList(), pageable, total);
+    var results = query.getResultList().stream()
+      .map(o -> mapper.toDto((Product)o))
+      .collect(Collectors.toList());
+    return new PageImpl(results, pageable, total);
   }
 
   @GetMapping(path = "/{id}")
@@ -95,6 +98,7 @@ public class ProductsCrudController {
       throw new EntityNotFoundException("Entity not found");
     }
 
+    mapper.assertRemovable(entity);
     entityManager.remove(entity);
   }
 }

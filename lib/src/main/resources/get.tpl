@@ -1,11 +1,11 @@
 @GetMapping(path = "/{id}")
 @ResponseStatus(HttpStatus.OK)
 @Transactional(readOnly = true)
-public ${dto} read(@PathVariable Long id) {
-  var entity = entityManager.find(${model}.class, id);
+public ${method.dto.name} read(@PathVariable Long id) {
+  var entity = entityManager.find(${method.model.name}.class, id);
   if (Objects.isNull(entity)) {
     throw new EntityNotFoundException("Entity not found");
   }
 
-  return mapper.toDto(entity);
+  return mapper.${method.name}(entity);
 }

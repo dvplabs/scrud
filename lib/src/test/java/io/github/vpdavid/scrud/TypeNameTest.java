@@ -1,0 +1,28 @@
+/*
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
+ */
+package io.github.vpdavid.scrud;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import org.junit.jupiter.api.Test;
+
+/**
+ *
+ * @author david
+ */
+public class TypeNameTest {
+  
+  @Test
+  void getSimpleName() {
+    assertEquals("Data", new TypeName("com.data.Data").getName());
+    assertEquals("Info.Data", new TypeName("com.data.Info$Data").getName());
+  }
+
+  @Test
+  void getFullName() {
+    assertEquals("com.data.Info", new TypeName("com.data.Info").getFullName());
+    assertEquals("com.data.Info$Data", new TypeName("com.data.Info$Data").getFullName());
+  }
+}

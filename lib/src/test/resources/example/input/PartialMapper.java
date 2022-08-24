@@ -1,18 +1,16 @@
-package example;
+package example.input;
 
 import example.model.Product;
 import example.dto.ProductDto;
 import io.github.vpdavid.scrud.*;
 
-@Crud(resource = "/v1/products")
-public class FullMapper implements ResourceMapper<Product, ProductDto> {
+//@Crud(resource = "/v1/products", verbs = {Verb.PUT, Verb.GET})
+public class PartialMapper {
 
-  @Override
   public ProductDto toDto(Product model) {
     throw new UnsupportedOperationException();
   }
 
-  @Override
   public void updateEntity(Product model, ProductDto dto) {
     throw new UnsupportedOperationException();
   }
