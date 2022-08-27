@@ -25,4 +25,9 @@ public class TypeNameTest {
     assertEquals("com.data.Info", new TypeName("com.data.Info").getFullName());
     assertEquals("com.data.Info$Data", new TypeName("com.data.Info$Data").getFullName());
   }
+  
+  @Test
+  void getPackageName() {
+    assertEquals("com.data", new TypeName("com.data.Info").getPackageName());
+  }
 }

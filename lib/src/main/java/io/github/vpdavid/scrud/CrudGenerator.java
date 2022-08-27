@@ -7,12 +7,14 @@ import freemarker.template.TemplateException;
 import freemarker.template.TemplateExceptionHandler;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.io.StringWriter;
 import static java.lang.String.format;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
 import static java.util.stream.Collectors.groupingBy;
+import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
 import static java.util.stream.Collectors.mapping;
@@ -38,7 +40,7 @@ import lombok.Getter;
 public class CrudGenerator extends AbstractProcessor {
 
   private final Pattern PATH_RESOURCE_NAME_PATTERN = Pattern.compile("^.*/([^/]+)$");
-  private final String PACKAGE_DECLARATION = "package %s;\n\n";
+  private final String PACKAGE_DECLARATION = "package %s;\n";
   private final String COMMOM_IMPORTS
       = "import java.util.*;\n"
       + "import java.util.stream.*;\n"
@@ -48,16 +50,18 @@ public class CrudGenerator extends AbstractProcessor {
       + "import org.springframework.data.domain.*;\n"
       + "import org.springframework.http.HttpStatus;\n"
       + "import org.springframework.transaction.annotation.Transactional;\n"
-      + "import org.springframework.web.bind.annotation.*;\n\n";
+      + "import org.springframework.web.bind.annotation.*;\n";
   private final String INPUT_IMPORTS
       = "import %s;\n"
-      + "import %s;\n\n";
+      + "import %s;\n";
   private final String CLASS_DECLARATION
       = "@RestController\n"
-      + "@RequestMapping(path = \"%s\")"
-      + "public class %sCrudController {"
-      + "\t@Autowired\n\tprivate EntityManager entityManager;\n"
-      + "\t@Autowired\n\tprivate BasicMapper mapper;\n\n";
+      + "@RequestMapping(path = \"%s\")\n"
+      + "public class %sCrudController {\n"
+      + "  @Autowired\n"
+      + "  private EntityManager entityManager;\n"
+      + "  @Autowired\n"
+      + "  private %s mapper;\n";
 
   Configuration freeMarkerCfg;
 
@@ -74,7 +78,6 @@ public class CrudGenerator extends AbstractProcessor {
           .collect(toList());
 
       for (var el : elements) {
-        var packageName = ((PackageElement) el.getEnclosingElement()).getQualifiedName().toString();
         var val = getAnnotationValues(el);
 
         var methods = el.getEnclosedElements().stream()
@@ -84,13 +87,15 @@ public class CrudGenerator extends AbstractProcessor {
             .filter(pair -> pair.getMethod().validFor(pair.getVerb()))
             .collect(groupingBy(Pair::getVerb,
                 mapping(Pair::getMethod, toList())));
-
-        writeToFile(packageName, val, methods);
+        
+        writeToFile(new TypeName(((TypeElement)el).getQualifiedName().toString()), val, methods);
       }
       return true;
     }
     catch (Exception ex) {
-      processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR, ex.getMessage());
+      var problem = new StringWriter();
+      ex.printStackTrace(new PrintWriter(problem));
+      processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR, problem.toString());
       return false;
     }
   }
@@ -117,21 +122,22 @@ public class CrudGenerator extends AbstractProcessor {
   }
 
   private void writeToFile(
-      String packageName,
+      TypeName clazz,
       AnnotationValues val,
       Map<Verb, List<Method>> methods) throws IOException, TemplateException {
     String className = findResourceName(val.resource);
-    var file = processingEnv.getFiler().createSourceFile(packageName + format(".%sCrudController", className));
+    var file = processingEnv.getFiler().createSourceFile(
+        clazz.getPackageName() + format(".%sCrudController", className));
 
     try (var writer = new PrintWriter(file.openWriter())) {
-      writer.println(format(PACKAGE_DECLARATION, packageName));
+      writer.println(format(PACKAGE_DECLARATION, clazz.getPackageName()));
       writer.println(COMMOM_IMPORTS);
       writer.println(format(INPUT_IMPORTS, val.model.getFullName(), val.dto.getFullName()));
-      writer.println(format(CLASS_DECLARATION, val.resource, className));
+      writer.println(format(CLASS_DECLARATION, val.resource, className, clazz.getName()));
 
       for (var v : val.verbs) {
         var src = v.generateSource(freeMarkerCfg, methods.get(v).get(0));
-        writer.print("\n\n" + src);
+        writer.println(src);
       }
 
       writer.println("}");

@@ -19,90 +19,90 @@ public class VerbTest {
   Name name;
   
   String EXPECTED_GET = 
-      "@GetMapping(path = \"/{id}\")\n" +
-      "@ResponseStatus(HttpStatus.OK)\n" +
-      "@Transactional(readOnly = true)\n" +
-      "public MethodTest.Dto read(@PathVariable Long id) {\n" +
-      "  var entity = entityManager.find(MethodTest.Model.class, id);\n" +
-      "  if (Objects.isNull(entity)) {\n" +
-      "    throw new EntityNotFoundException(\"Entity not found\");\n" +
-      "  }\n" +
+      "  @GetMapping(path = \"/{id}\")\n" +
+      "  @ResponseStatus(HttpStatus.OK)\n" +
+      "  @Transactional(readOnly = true)\n" +
+      "  public MethodTest.Dto read(@PathVariable Long id) {\n" +
+      "    var entity = entityManager.find(MethodTest.Model.class, id);\n" +
+      "    if (Objects.isNull(entity)) {\n" +
+      "      throw new EntityNotFoundException(\"Entity not found\");\n" +
+      "    }\n" +
       "\n" +
-      "  return mapper.toDto(entity);\n" +
-      "}";
+      "    return mapper.toDto(entity);\n" +
+      "  }\n";
   
   String EXPECTED_POST =
-      "@PostMapping\n" +
-      "@ResponseStatus(HttpStatus.CREATED)\n" +
-      "@Transactional\n" +
-      "public void create(@RequestBody MethodTest.Dto dto) {\n" +
-      "  var entity = new MethodTest.Model();\n" +
-      "  mapper.updateEntity(entity, dto);\n" +
-      "  entityManager.persist(entity);\n" +
-      "}";
+      "  @PostMapping\n" +
+      "  @ResponseStatus(HttpStatus.CREATED)\n" +
+      "  @Transactional\n" +
+      "  public void create(@RequestBody MethodTest.Dto dto) {\n" +
+      "    var entity = new MethodTest.Model();\n" +
+      "    mapper.updateEntity(entity, dto);\n" +
+      "    entityManager.persist(entity);\n" +
+      "  }\n";
   
   String EXPECTED_PUT =
-      "@PutMapping(path = \"/{id}\")\n" +
-      "@ResponseStatus(HttpStatus.OK)\n" +
-      "@Transactional\n" +
-      "public void update(@RequestBody MethodTest.Dto dto, @PathVariable Long id) {\n" +
-      "  var entity = entityManager.find(MethodTest.Model.class, id);\n" +
-      "  if (Objects.isNull(entity)) {\n" +
-      "    throw new EntityNotFoundException(\"Entity not found\");\n" +
-      "  }\n" +
+      "  @PutMapping(path = \"/{id}\")\n" +
+      "  @ResponseStatus(HttpStatus.OK)\n" +
+      "  @Transactional\n" +
+      "  public void update(@RequestBody MethodTest.Dto dto, @PathVariable Long id) {\n" +
+      "    var entity = entityManager.find(MethodTest.Model.class, id);\n" +
+      "    if (Objects.isNull(entity)) {\n" +
+      "      throw new EntityNotFoundException(\"Entity not found\");\n" +
+      "    }\n" +
       "\n" +
-      "  mapper.updateEntity(entity, dto);\n" +
-      "}";
+      "    mapper.updateEntity(entity, dto);\n" +
+      "  }\n";
   
   String EXPECTED_DELETE = 
-      "@DeleteMapping(path = \"/{id}\")\n" +
-      "@ResponseStatus(HttpStatus.OK)\n" +
-      "@Transactional\n" +
-      "public void delete(@PathVariable Long id) {\n" +
-      "  var entity = entityManager.find(MethodTest.Model.class, id);\n" +
-      "  if (Objects.isNull(entity)) {\n" +
-      "    throw new EntityNotFoundException(\"Entity not found\");\n" +
-      "  }\n" +
-      "  \n" +
-      "  mapper.assertValidDeletion(entity);\n" +
-      "  entityManager.remove(entity);\n" +
-      "}";
+      "  @DeleteMapping(path = \"/{id}\")\n" +
+      "  @ResponseStatus(HttpStatus.OK)\n" +
+      "  @Transactional\n" +
+      "  public void delete(@PathVariable Long id) {\n" +
+      "    var entity = entityManager.find(MethodTest.Model.class, id);\n" +
+      "    if (Objects.isNull(entity)) {\n" +
+      "      throw new EntityNotFoundException(\"Entity not found\");\n" +
+      "    }\n" +
+      "\n" +
+      "    mapper.assertValidDeletion(entity);\n" +
+      "    entityManager.remove(entity);\n" +
+      "  }\n";
   
   String EXPECTED_GET_ALL = 
-      "@GetMapping\n" +
-      "@ResponseStatus(HttpStatus.OK)\n" +
-      "@Transactional(readOnly = true)\n" +
-      "public Page<MethodTest.Dto> read(Pageable pageable) {\n" +
-      "  var cb = entityManager.getCriteriaBuilder();\n" +
+      "  @GetMapping\n" +
+      "  @ResponseStatus(HttpStatus.OK)\n" +
+      "  @Transactional(readOnly = true)\n" +
+      "  public Page<MethodTest.Dto> read(Pageable pageable) {\n" +
+      "    var cb = entityManager.getCriteriaBuilder();\n" +
       "\n" +
-      "  var cqTotal = cb.createQuery(Long.class);\n" +
-      "  var selectTotal = cqTotal.select(cb.count(cqTotal.from(MethodTest.Model.class)));\n" +
-      "  Long total = entityManager.createQuery(selectTotal).getSingleResult();\n" +
+      "    var cqTotal = cb.createQuery(Long.class);\n" +
+      "    var selectTotal = cqTotal.select(cb.count(cqTotal.from(MethodTest.Model.class)));\n" +
+      "    Long total = entityManager.createQuery(selectTotal).getSingleResult();\n" +
       "\n" +
-      "  var cq = cb.createQuery(MethodTest.Model.class);\n" +
-      "  var root = cq.from(MethodTest.Model.class);\n" +
-      "  cq.select(root);\n" +
+      "    var cq = cb.createQuery(MethodTest.Model.class);\n" +
+      "    var root = cq.from(MethodTest.Model.class);\n" +
+      "    cq.select(root);\n" +
       "\n" +
-      "  if (pageable.getSort().isSorted()) {\n" +
-      "    var orders = new ArrayList<Order>();\n" +
-      "    for (var order : pageable.getSort()) {\n" +
-      "      if (order.isAscending()) {\n" +
-      "        orders.add(cb.asc(root.get(order.getProperty())));\n" +
-      "      } else {\n" +
-      "        orders.add(cb.desc(root.get(order.getProperty())));\n" +
+      "    if (pageable.getSort().isSorted()) {\n" +
+      "      var orders = new ArrayList<Order>();\n" +
+      "      for (var order : pageable.getSort()) {\n" +
+      "        if (order.isAscending()) {\n" +
+      "          orders.add(cb.asc(root.get(order.getProperty())));\n" +
+      "        } else {\n" +
+      "          orders.add(cb.desc(root.get(order.getProperty())));\n" +
+      "        }\n" +
       "      }\n" +
+      "      cq.orderBy(orders);\n" +
       "    }\n" +
-      "    cq.orderBy(orders);\n" +
-      "  }\n" +
       "\n" +
-      "  var query = entityManager.createQuery(cq);\n" +
-      "  query.setFirstResult(pageable.getPageNumber() * pageable.getPageSize());\n" +
-      "  query.setMaxResults(pageable.getPageSize());\n" +
-      "  var results = query.getResultList().stream()\n" +
-      "    .map(o -> mapper.toDto((MethodTest.Model)o))\n" +
-      "    .collect(Collectors.toList());\n" +
-      "  return new PageImpl(results, pageable, total);\n" +
-      "}";
+      "    var query = entityManager.createQuery(cq);\n" +
+      "    query.setFirstResult(pageable.getPageNumber() * pageable.getPageSize());\n" +
+      "    query.setMaxResults(pageable.getPageSize());\n" +
+      "    var results = query.getResultList().stream()\n" +
+      "      .map(o -> mapper.toDto((MethodTest.Model)o))\n" +
+      "      .collect(Collectors.toList());\n" +
+      "    return new PageImpl(results, pageable, total);\n" +
+      "  }\n";
   
   @Test
   void generateSourceCode() throws Exception {

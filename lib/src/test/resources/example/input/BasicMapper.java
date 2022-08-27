@@ -3,19 +3,16 @@ package example.input;
 import example.input.model.Product;
 import example.input.dto.ProductDto;
 import io.github.vpdavid.scrud.*;
+import org.springframework.lang.NonNull;
 
 @Crud(resource = "/products", model = Product.class, dto = ProductDto.class)
-public class BasicMapper {
+public interface BasicMapper {
   
-  public ProductDto toDto(Product model) {
-    throw new UnsupportedOperationException();
-  }
+  ProductDto toDto(Product model);
   
-  public void updateEntity(Product model, ProductDto dto) {
-    throw new UnsupportedOperationException();
-  }
+  void updateEntity(@NonNull Product model, ProductDto dto);
   
-  public void assertRemovable(Product model) {
-    throw new UnsupportedOperationException();
+  default void assertRemovable(Product model) {
+    
   }
 }

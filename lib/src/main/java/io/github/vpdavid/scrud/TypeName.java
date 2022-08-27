@@ -15,16 +15,23 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class TypeName {
   private final String name;
-  private Pattern p = Pattern.compile(".+\\.(?!\\.)(.+)");
+  private final Pattern CLASS_NAME_PATTERN = Pattern.compile(".+\\.(?!\\.)(.+)");
+  private final Pattern PACKAGE_NAME_PATTERN = Pattern.compile("(.+)\\.(?!\\.).+");
   
   public String getName() {
-    var matcher = p.matcher(name);
+    var matcher = CLASS_NAME_PATTERN.matcher(name);
     matcher.find();
     return matcher.group(1).replace("$", ".");
   }
   
   public String getFullName() {
     return name;
+  }
+
+  public String getPackageName() {
+    var matcher = PACKAGE_NAME_PATTERN.matcher(name);
+    matcher.find();
+    return matcher.group(1);
   }
   
 }
