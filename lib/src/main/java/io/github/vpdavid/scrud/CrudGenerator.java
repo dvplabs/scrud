@@ -112,10 +112,10 @@ public class CrudGenerator extends AbstractProcessor {
 
     var values = new AnnotationValues();
     values.resource = (String) defaults.get("resource").getValue();
-    values.verbs = ((List<?>) defaults.get("verbs").getValue()).stream()
-        .map(Object::toString)
-        .map(ss -> Verb.valueOf(new TypeName(ss).getName()))
-        .collect(toList());
+//    values.verbs = ((List<?>) defaults.get("verbs").getValue()).stream()
+//        .map(Object::toString)
+//        .map(ss -> Verb.valueOf(new TypeName(ss).getName()))
+//        .collect(toList());
     values.model = new TypeName(defaults.get("model").getValue().toString());
     values.dto = new TypeName(defaults.get("dto").getValue().toString());
     return values;
@@ -135,10 +135,10 @@ public class CrudGenerator extends AbstractProcessor {
       writer.println(format(INPUT_IMPORTS, val.model.getFullName(), val.dto.getFullName()));
       writer.println(format(CLASS_DECLARATION, val.resource, className, clazz.getName()));
 
-      for (var v : val.verbs) {
-        var src = v.generateSource(freeMarkerCfg, methods.get(v).get(0));
-        writer.println(src);
-      }
+//      for (var v : val.verbs) {
+//        var src = v.generateSourceCode(freeMarkerCfg, methods.get(v).get(0));
+//        writer.println(src);
+//      }
 
       writer.println("}");
     }

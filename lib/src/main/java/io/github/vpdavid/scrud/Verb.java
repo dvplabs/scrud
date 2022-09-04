@@ -8,29 +8,31 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Map;
+import lombok.RequiredArgsConstructor;
 
 /**
  *
  * @author david
  */
-public enum Verb {
-  GET_ALL("get-all.tpl"),
-  GET("get.tpl"),
-  POST("post.tpl"),
-  PUT("put.tpl"), 
-  DELETE("delete.tpl");
+@RequiredArgsConstructor
+public class Verb {
+//
+//  private static final Verb GET_ALL = new Verb("get-all.tpl");
+//  private static final Verb GET = new Verb("get.tpl");
+//  private static final Verb POST = new Verb("post.tpl");
+//  private static final Verb PUT = new Verb("put.tpl");
+//  private static final Verb DELETE = new Verb("delete.tpl");
   
-  private final String TEMPLATE_NAME;
+  private final Configuration conf;
+  private final String templateName;
   
-  Verb(String templateName) {
-    this.TEMPLATE_NAME = templateName;
-  }
-  
-  String generateSource(Configuration conf, Method method) 
+  public String generateSourceCode(Method method) 
       throws MalformedTemplateNameException, ParseException, IOException, TemplateException {
-    var template = conf.getTemplate(TEMPLATE_NAME);
+    var template = conf.getTemplate(templateName);
     ByteArrayOutputStream out = new ByteArrayOutputStream();
     template.process(Map.of("method", method), new PrintWriter(out));
     return out.toString();
   }
+  
+//  public abstract boolean validFor(Method method);
 }

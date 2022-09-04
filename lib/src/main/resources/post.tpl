@@ -1,8 +1,8 @@
   @PostMapping
   @ResponseStatus(HttpStatus.CREATED)
   @Transactional
-  public void create(@RequestBody ${method.dto.name} dto) {
-    var entity = new ${method.model.name}();
-    mapper.${method.name}(entity, dto);
-    entityManager.persist(entity);
+  public void create(@RequestBody ${method.dtoType.name} ${method.dtoName}) {
+    var ${method.modelName} = new ${method.modelType.name}();
+    mapper.${method.name}(${method.generateArgumentsSignature()});
+    entityManager.persist(${method.modelName});
   }
