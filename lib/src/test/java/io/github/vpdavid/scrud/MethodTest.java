@@ -1,7 +1,6 @@
 package io.github.vpdavid.scrud;
 
 import java.util.Arrays;
-import java.util.List;
 import static java.util.stream.Collectors.toList;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Name;
@@ -33,15 +32,6 @@ public class MethodTest {
   void init() {
     method = new Method(el, Model.class.getName(), Dto.class.getName());
   }
-  
-//  @Test
-//  void returnsDtoAndParameterIsModel() {
-//    mockReturnType(el, Dto.class.getName());
-//    mockParameter(el, Model.class);
-//    
-//    assertTrue(method.validFor(Verb.GET));
-//    assertTrue(method.validFor(Verb.GET_ALL));
-//  }
   
   static void mockReturnType(ExecutableElement el, String clazz) {
     TypeMirror returnType = mock(TypeMirror.class);
@@ -77,34 +67,6 @@ public class MethodTest {
     lenient().when(mirror.toString()).thenReturn(param.clazz.getName());
     return variableElement;
   }
-//  
-//  @Test
-//  void returnsVoidAndParameterIsModelAndDto() {
-//    mockReturnType(el, "void");
-//    mockParameter(el, Model.class, Dto.class);
-//    
-//    assertTrue(method.validFor(Verb.POST));
-//    assertTrue(method.validFor(Verb.PUT));
-//  }
-//  
-//  @Test
-//  void returnsVoidAndParameterdDtoAndModel() {
-//    mockReturnType(el, "void");
-//    mockParameter(el, Dto.class, Model.class);
-//    
-//    assertTrue(method.validFor(Verb.POST));
-//    assertTrue(method.validFor(Verb.PUT));
-//  }
-//  
-//  @Test
-//  void returnsVoidnAndParameterIsModel() {
-//    mockReturnType(el, "void");
-//    mockParameter(el, Model.class);
-//    assertTrue(method.validFor(Verb.DELETE));
-//    
-//    mockParameter(el, Model.class, Dto.class);
-//    assertFalse(method.validFor(Verb.DELETE));
-//  }
   
   static class Model {}
   static class Dto {}
