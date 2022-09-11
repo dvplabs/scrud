@@ -31,7 +31,7 @@ public class MethodTest {
   
   @BeforeEach
   void init() {
-    method = new Method(el, new TypeName(Model.class.getName()), new TypeName(Dto.class.getName()));
+    method = new Method(el, Model.class.getName(), Dto.class.getName());
   }
   
 //  @Test
@@ -46,7 +46,7 @@ public class MethodTest {
   static void mockReturnType(ExecutableElement el, String clazz) {
     TypeMirror returnType = mock(TypeMirror.class);
     when(el.getReturnType()).thenReturn(returnType);
-    when(returnType.toString()).thenReturn(new TypeName(clazz).getName());
+    when(returnType.toString()).thenReturn(clazz);
   }
   
   static void mockParameter(ExecutableElement el, Class<?>...clazz) {
@@ -126,13 +126,39 @@ public class MethodTest {
   @Test
   void returnsTypeResponse() {
     mockReturnType(el, Integer.class.getName());
-    assertEquals("Integer", method.getReturnType());
+    assertEquals("java.lang.Integer", method.getReturnType().getFullName());
   }
   
   @Test
-  void checksContainsParameter() {
+  void checksContainsParameterModel() {
     mockParameter(el, Model.class);
-    assertTrue(method.containsParameter(Model.class.getName()));
+    assertTrue(method.containsParameterModel());
+    mockParameter(el, Double.class);
+    assertFalse(method.containsParameterModel());
+  }
+  
+  @Test
+  void checkContainsParameterDto() {
+    mockParameter(el, Dto.class);
+    assertTrue(method.containsParameterDto());
+    mockParameter(el, Double.class);
+    assertFalse(method.containsParameterDto());
+  }
+  
+  @Test
+  void checkReturnTypeIsDto() {
+    mockReturnType(el, Dto.class.getName());
+    assertTrue(method.isReturnTypeDto());
+    mockReturnType(el, Double.class.getName());
+    assertFalse(method.isReturnTypeDto());
+  }
+  
+  @Test
+  void checkReturnTypeIsVoid() {
+    mockReturnType(el, "void");
+    assertTrue(method.isReturnTypeVoid());
+    mockReturnType(el, Dto.class.getName());
+    assertFalse(method.isReturnTypeVoid());
   }
   
   @Test

@@ -60,45 +60,45 @@ public class ProductsCrudController {
   @ResponseStatus(HttpStatus.OK)
   @Transactional(readOnly = true)
   public ProductDto read(@PathVariable Long id) {
-    var entity = entityManager.find(Product.class, id);
-    if (Objects.isNull(entity)) {
+    var model = entityManager.find(Product.class, id);
+    if (Objects.isNull(model)) {
       throw new EntityNotFoundException("Entity not found");
     }
 
-    return mapper.toDto(entity);
+    return mapper.toDto(model);
   }
 
   @PostMapping
   @ResponseStatus(HttpStatus.CREATED)
   @Transactional
   public void create(@RequestBody ProductDto dto) {
-    var entity = new Product();
-    mapper.updateEntity(entity, dto);
-    entityManager.persist(entity);
+    var model = new Product();
+    mapper.updateEntity(model, dto);
+    entityManager.persist(model);
   }
 
   @PutMapping(path = "/{id}")
   @ResponseStatus(HttpStatus.OK)
   @Transactional
   public void update(@RequestBody ProductDto dto, @PathVariable Long id) {
-    var entity = entityManager.find(Product.class, id);
-    if (Objects.isNull(entity)) {
+    var model = entityManager.find(Product.class, id);
+    if (Objects.isNull(model)) {
       throw new EntityNotFoundException("Entity not found");
     }
 
-    mapper.updateEntity(entity, dto);
+    mapper.updateEntity(model, dto);
   }
 
   @DeleteMapping(path = "/{id}")
   @ResponseStatus(HttpStatus.OK)
   @Transactional
   public void delete(@PathVariable Long id) {
-    var entity = entityManager.find(Product.class, id);
-    if (Objects.isNull(entity)) {
+    var model = entityManager.find(Product.class, id);
+    if (Objects.isNull(model)) {
       throw new EntityNotFoundException("Entity not found");
     }
 
-    mapper.assertRemovable(entity);
-    entityManager.remove(entity);
+    mapper.assertRemovable(model);
+    entityManager.remove(model);
   }
 }

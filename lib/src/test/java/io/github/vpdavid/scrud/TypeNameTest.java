@@ -16,8 +16,8 @@ public class TypeNameTest {
   
   @Test
   void getSimpleName() {
-    assertEquals("Data", new TypeName("com.data.Data").getName());
-    assertEquals("Info.Data", new TypeName("com.data.Info$Data").getName());
+    assertEquals("Data", new TypeName("com.data.Data").getSimpleName());
+    assertEquals("Info.Data", new TypeName("com.data.Info$Data").getSimpleName());
   }
 
   @Test

@@ -17,54 +17,28 @@ public class Method {
   @Getter
   private TypeName modelType, dtoType;
   
-  public Method(Element el, TypeName model, TypeName dto) {
+  public Method(Element el, String modelType, String dtoType) {
     if (el instanceof ExecutableElement) {
       this.el = (ExecutableElement) el;
     }
-    this.modelType = model;
-    this.dtoType = dto;
-  }
-  
-  boolean validFor(Verb v) {
-    var validReturnType = false;
-    var validParameter = false;
-    
-//    if (v == Verb.GET || v == Verb.GET_ALL) {
-//      validReturnType = dto.getFullName().equals(el.getReturnType().toString());
-//      validParameter = model.getFullName().equals(el.getParameters().get(0).asType().toString());
-//    } else if (v == Verb.POST || v == Verb.PUT) {
-//      validReturnType = "void".equals(el.getReturnType().toString());
-//      var params = el.getParameters().stream()
-//          .map(Element::asType)
-//          .map(Object::toString)
-//          .collect(toSet());
-//      validParameter = params.contains(model.getFullName()) && params.contains(dto.getFullName());
-//    } if (v == Verb.DELETE) {
-//      validReturnType = "void".equals(el.getReturnType().toString());
-//      var parms = el.getParameters().stream()
-//          .map(Element::asType)
-//          .map(Object::toString)
-//          .collect(toSet());
-//      validParameter = parms.contains(model.getFullName()) && parms.size() == 1;
-//    }
-    
-    return validReturnType && validParameter;
+    this.modelType = new TypeName(modelType);
+    this.dtoType = new TypeName(dtoType);
   }
   
   public String getName() {
     return el.getSimpleName().toString();
   }
   
-  public String getReturnType() {
-    return el.getReturnType().toString();
+  public TypeName getReturnType() {
+    return new TypeName(el.getReturnType().toString());
   }
 
-  boolean containsParameter(String name) {
+  private boolean containsParameterType(String typeName) {
     var params = el.getParameters().stream()
           .map(Element::asType)
           .map(Object::toString)
           .collect(toSet());
-    return params.contains(name);
+    return params.contains(typeName);
   }
 
   public String getModelName() {
@@ -75,7 +49,7 @@ public class Method {
     var providedModel = el.getParameters().stream()
         .filter(p -> clazzName.equals(p.asType().toString()))
         .findFirst()
-        .orElseThrow(() -> new IllegalStateException("Parameter of tye " + modelType.getName() + " does not exist"));
+        .orElseThrow(() -> new IllegalStateException("Parameter of tye " + modelType.getSimpleName() + " does not exist"));
     
     return providedModel.toString();
   }
@@ -86,7 +60,7 @@ public class Method {
 
   public String generateParametersSignature() {
     return el.getParameters().stream()
-        .map(p -> new TypeName(p.asType().toString()).getName() + " " + p.toString())
+        .map(p -> new TypeName(p.asType().toString()).getSimpleName() + " " + p.toString())
         .collect(joining(", "));
   }
 
@@ -94,6 +68,22 @@ public class Method {
     return el.getParameters().stream()
         .map(p -> p.toString())
         .collect(joining(", "));
+  }
+
+  public boolean containsParameterModel() {
+    return containsParameterType(modelType.getFullName());
+  }
+  
+  public boolean containsParameterDto() {
+    return containsParameterType(dtoType.getFullName());
+  }
+
+  public boolean isReturnTypeDto() {
+    return getReturnType().equals(dtoType);
+  }
+
+  public boolean isReturnTypeVoid() {
+    return getReturnType().getFullName().equals("void");
   }
   
 }

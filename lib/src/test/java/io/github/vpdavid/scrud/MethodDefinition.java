@@ -80,7 +80,7 @@ public class MethodDefinition {
   void mockReturnType() {
     TypeMirror returnType = mock(TypeMirror.class);
     lenient().when(element.getReturnType()).thenReturn(returnType);
-    lenient().when(returnType.toString()).thenReturn(new TypeName(returnTypeName).getName());
+    lenient().when(returnType.toString()).thenReturn(returnTypeName);
   }
   
   void mockMethodName() {

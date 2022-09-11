@@ -5,6 +5,7 @@
 package io.github.vpdavid.scrud;
 
 import java.util.regex.Pattern;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
@@ -12,13 +13,16 @@ import lombok.RequiredArgsConstructor;
  *
  * @author david
  */
+@EqualsAndHashCode
 @RequiredArgsConstructor
 public class TypeName {
   private final String name;
+  @EqualsAndHashCode.Exclude
   private final Pattern CLASS_NAME_PATTERN = Pattern.compile(".+\\.(?!\\.)(.+)");
+  @EqualsAndHashCode.Exclude
   private final Pattern PACKAGE_NAME_PATTERN = Pattern.compile("(.+)\\.(?!\\.).+");
   
-  public String getName() {
+  public String getSimpleName() {
     var matcher = CLASS_NAME_PATTERN.matcher(name);
     matcher.find();
     return matcher.group(1).replace("$", ".");
