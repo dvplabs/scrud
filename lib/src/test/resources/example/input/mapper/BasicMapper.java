@@ -1,4 +1,4 @@
-package example.input;
+package example.input.mapper;
 
 import example.input.model.Product;
 import example.input.dto.ProductDto;

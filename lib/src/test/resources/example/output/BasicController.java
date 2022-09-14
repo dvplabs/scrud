@@ -1,4 +1,4 @@
-package example.input;
+package example.input.mapper;
 
 import java.util.*;
 import java.util.stream.*;

@@ -31,20 +31,13 @@ public class CrudGeneratorTest {
   }
   
   @Test
-  @Disabled
-  void generatesEmptyControllerForResource() throws IOException {
-    generateController("example/EmptyMapper.java", "expected/EmptyController.java");
-  }
-  
-  @Test
   void generateFullControllerForResource() throws IOException {
-    generateController("example/input/BasicMapper.java", "example/output/BasicController.java");
+    generateController("example/input/mapper/BasicMapper.java", "example/output/BasicController.java");
   }
   
   @Test
-  @Disabled
   void generatePartialControllerForResource() throws IOException {
-    generateController("example/PartialMapper.java", "expected/PartialController.java");
+    generateController("example/input/mapper/PartialMapper.java", "example/output/PartialController.java");
   }
   
   void generateController(String mapperPath, String resultPath) throws IOException {
@@ -61,7 +54,7 @@ public class CrudGeneratorTest {
         .compile(files);
     
     assertThat(compilation)
-        .generatedSourceFile("example.input.ProductsCrudController")
+        .generatedSourceFile("example.input.mapper.ProductsCrudController")
         .hasSourceEquivalentTo(JavaFileObjects.forResource(resultPath));
   }
 }

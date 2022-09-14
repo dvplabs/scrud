@@ -1,4 +1,4 @@
-package example.output;
+package example.input.mapper;
 
 import java.util.*;
 import java.util.stream.*;
@@ -9,9 +9,8 @@ import org.springframework.data.domain.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
-import io.github.vpdavid.scrud.ResourceMapper;
-import example.model.Product;
-import example.dto.ProductDto;
+import example.input.model.Product;
+import example.input.dto.ProductDto;
 
 @RestController
 @RequestMapping(path = "/v1/products")
@@ -20,29 +19,29 @@ public class ProductsCrudController {
   @Autowired
   private EntityManager entityManager;
   @Autowired
-  private ResourceMapper<Product, ProductDto> mapper;
+  private PartialMapper mapper;
   
   @PutMapping(path = "/{id}")
   @ResponseStatus(HttpStatus.OK)
   @Transactional
-  public void update(@RequestBody ProductDto dto, @PathVariable Long id) {
-    var entity = entityManager.find(Product.class, id);
-    if (Objects.isNull(entity)) {
+  public void update(@RequestBody ProductDto myDto, @PathVariable Long id) {
+    var myModel = entityManager.find(Product.class, id);
+    if (Objects.isNull(myModel)) {
       throw new EntityNotFoundException("Entity not found");
     }
 
-    mapper.updateEntity(entity, dto);
+    mapper.updateEntity(myModel, myDto);
   }
 
   @GetMapping(path = "/{id}")
   @ResponseStatus(HttpStatus.OK)
   @Transactional(readOnly = true)
   public ProductDto read(@PathVariable Long id) {
-    var entity = entityManager.find(Product.class, id);
-    if (Objects.isNull(entity)) {
+    var myModel = entityManager.find(Product.class, id);
+    if (Objects.isNull(myModel)) {
       throw new EntityNotFoundException("Entity not found");
     }
 
-    return mapper.toDto(entity);
+    return mapper.toDto(myModel);
   }
 }
