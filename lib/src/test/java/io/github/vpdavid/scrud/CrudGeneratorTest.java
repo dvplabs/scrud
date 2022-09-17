@@ -40,6 +40,11 @@ public class CrudGeneratorTest {
     generateController("example/input/mapper/PartialMapper.java", "example/output/PartialController.java");
   }
   
+  @Test
+  void generateControllerWithExtraParams() throws IOException {
+    generateController("example/input/mapper/MapperWithExtraParams.java", "example/output/ControllerWithExtraParams.java");
+  }
+  
   void generateController(String mapperPath, String resultPath) throws IOException {
     var files = Stream.of(
           "example/input/model/Product.java", 

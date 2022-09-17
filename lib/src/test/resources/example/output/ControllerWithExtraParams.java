@@ -9,22 +9,26 @@ import org.springframework.data.domain.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
+
 import example.input.model.Product;
 import example.input.dto.ProductDto;
 
+import io.github.vpdavid.scrud.util.CustomSession;
+import jakarta.servlet.http.HttpServletRequest;
+
 @RestController
-@RequestMapping(path = "/products")
+@RequestMapping(path = "/v1/products")
 public class ProductsCrudController {
 
   @Autowired
   private EntityManager entityManager;
   @Autowired
-  private BasicMapper mapper;
-
+  private MapperWithExtraParams mapper;
+  
   @GetMapping
   @ResponseStatus(HttpStatus.OK)
   @Transactional(readOnly = true)
-  public Page<ProductDto> read(Pageable pageable) {
+  public Page<ProductDto> read(Pageable pageable, CustomSession mySession) {
     var cb = entityManager.getCriteriaBuilder();
 
     var cqTotal = cb.createQuery(Long.class);
@@ -51,7 +55,7 @@ public class ProductsCrudController {
     query.setFirstResult(pageable.getPageNumber() * pageable.getPageSize());
     query.setMaxResults(pageable.getPageSize());
     var results = query.getResultList().stream()
-      .map(model -> mapper.toDto(model))
+      .map(model -> mapper.toDto(mySession, model))
       .collect(Collectors.toList());
     return new PageImpl(results, pageable, total);
   }
@@ -59,46 +63,46 @@ public class ProductsCrudController {
   @GetMapping(path = "/{id}")
   @ResponseStatus(HttpStatus.OK)
   @Transactional(readOnly = true)
-  public ProductDto read(@PathVariable Long id) {
+  public ProductDto read(@PathVariable Long id, CustomSession mySession) {
     var model = entityManager.find(Product.class, id);
     if (Objects.isNull(model)) {
       throw new EntityNotFoundException("Entity not found");
     }
 
-    return mapper.toDto(model);
+    return mapper.toDto(mySession, model);
   }
 
   @PostMapping
   @ResponseStatus(HttpStatus.CREATED)
   @Transactional
-  public void create(@RequestBody ProductDto dto) {
-    var model = new Product();
-    mapper.updateEntity(model, dto);
-    entityManager.persist(model);
+  public void create(@RequestBody ProductDto someDto, CustomSession customSession, HttpServletRequest request) {
+    var someModel = new Product();
+    mapper.updateEntity(someDto, customSession, someModel, request);
+    entityManager.persist(someModel);
   }
 
   @PutMapping(path = "/{id}")
   @ResponseStatus(HttpStatus.OK)
   @Transactional
-  public void update(@RequestBody ProductDto dto, @PathVariable Long id) {
-    var model = entityManager.find(Product.class, id);
-    if (Objects.isNull(model)) {
+  public void update(@RequestBody ProductDto someDto, @PathVariable Long id, CustomSession customSession, HttpServletRequest request) {
+    var someModel = entityManager.find(Product.class, id);
+    if (Objects.isNull(someModel)) {
       throw new EntityNotFoundException("Entity not found");
     }
 
-    mapper.updateEntity(model, dto);
+    mapper.updateEntity(someDto, customSession, someModel, request);
   }
 
   @DeleteMapping(path = "/{id}")
   @ResponseStatus(HttpStatus.OK)
   @Transactional
-  public void delete(@PathVariable Long id) {
-    var model = entityManager.find(Product.class, id);
-    if (Objects.isNull(model)) {
+  public void delete(@PathVariable Long id, CustomSession session) {
+    var myModel = entityManager.find(Product.class, id);
+    if (Objects.isNull(myModel)) {
       throw new EntityNotFoundException("Entity not found");
     }
 
-    mapper.assertRemovable(model);
-    entityManager.remove(model);
+    mapper.assertDelete(myModel, session);
+    entityManager.remove(myModel);
   }
 }

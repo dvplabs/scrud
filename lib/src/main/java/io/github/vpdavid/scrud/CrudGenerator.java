@@ -10,11 +10,14 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import static java.lang.String.format;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.regex.Pattern;
 import static java.util.stream.Collectors.groupingBy;
+import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
 import static java.util.stream.Collectors.mapping;
@@ -83,15 +86,7 @@ public class CrudGenerator extends AbstractProcessor {
 
       for (var el : elements) {
         var val = getAnnotationValues(el);
-
-        var methods = el.getEnclosedElements().stream()
-            .filter(element -> element.getKind() == ElementKind.METHOD)
-            .map(methodDef -> new Method(methodDef, val.model.getFullName(), val.dto.getFullName()))
-            .flatMap(method -> val.verbProcessors.stream().map(verb -> new Pair(method, verb)))
-            .filter(pair -> pair.processor.getVerb().validFor(pair.method))
-            .collect(groupingBy(Pair::getProcessor,
-                mapping(Pair::getMethod, toList())));
-
+        var methods = findAvailableMethods(el, val);
         writeToFile(new TypeName(((TypeElement) el).getQualifiedName().toString()), val, methods);
       }
       return true;
@@ -125,6 +120,16 @@ public class CrudGenerator extends AbstractProcessor {
     values.dto = new TypeName(defaults.get("dto").getValue().toString());
     return values;
   }
+  
+  private Map<VerbProcessor, List<Method>> findAvailableMethods(Element el, AnnotationValues val) {
+    return el.getEnclosedElements().stream()
+            .filter(element -> element.getKind() == ElementKind.METHOD)
+            .map(methodDef -> new Method(methodDef, val.model.getFullName(), val.dto.getFullName()))
+            .flatMap(method -> val.verbProcessors.stream().map(verb -> new Pair(method, verb)))
+            .filter(pair -> pair.processor.getVerb().validFor(pair.method))
+            .collect(groupingBy(Pair::getProcessor,
+                mapping(Pair::getMethod, toList())));
+  }
 
   private void writeToFile(
       TypeName clazz,
@@ -133,15 +138,28 @@ public class CrudGenerator extends AbstractProcessor {
     String className = findResourceName(val.resource);
     var file = processingEnv.getFiler().createSourceFile(
         clazz.getPackageName() + format(".%sCrudController", className));
+    
+    var verbs = val.verbProcessors.stream()
+        .map(processor -> new Pair(methods.get(processor).get(0), processor))
+        .collect(toList());
+    
+    var extraImports = verbs.stream()
+          .flatMap(p -> p.method.getNonModelAndDtoParams().stream())
+          .distinct()
+          .sorted()
+          .map(i -> "import " + i + ";")
+          .collect(joining("\n"));
 
     try ( var writer = new PrintWriter(file.openWriter())) {
       writer.println(format(PACKAGE_DECLARATION, clazz.getPackageName()));
       writer.println(COMMOM_IMPORTS);
       writer.println(format(INPUT_IMPORTS, val.model.getFullName(), val.dto.getFullName()));
+      writer.println(extraImports);
+      writer.println("");
       writer.println(format(CLASS_DECLARATION, val.resource, className, clazz.getSimpleName()));
-
-      for (var v : val.verbProcessors) {
-        var src = v.generateSourceCode(methods.get(v).get(0));
+      
+      for (var v : verbs) {
+        var src = v.processor.generateSourceCode(v.method);
         writer.println(src);
       }
 

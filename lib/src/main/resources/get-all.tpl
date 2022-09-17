@@ -1,7 +1,8 @@
   @GetMapping
   @ResponseStatus(HttpStatus.OK)
   @Transactional(readOnly = true)
-  public Page<${method.returnType.simpleName}> read(Pageable pageable) {
+  <#assign params = method.generateParametersSignature()>
+  public Page<${method.returnType.simpleName}> read(Pageable pageable<#if params?length gt 0>, ${params}</#if>) {
     var cb = entityManager.getCriteriaBuilder();
 
     var cqTotal = cb.createQuery(Long.class);
@@ -28,7 +29,7 @@
     query.setFirstResult(pageable.getPageNumber() * pageable.getPageSize());
     query.setMaxResults(pageable.getPageSize());
     var results = query.getResultList().stream()
-      .map(o -> mapper.${method.name}((${method.modelType.simpleName})o))
+      .map(${method.modelName} -> mapper.${method.name}(${method.generateArgumentsSignature()}))
       .collect(Collectors.toList());
     return new PageImpl(results, pageable, total);
   }

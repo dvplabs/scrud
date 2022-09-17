@@ -1,6 +1,9 @@
 package io.github.vpdavid.scrud;
 
+import io.github.vpdavid.scrud.util.CustomSession;
+import jakarta.servlet.http.HttpServletRequest;
 import java.util.Arrays;
+import java.util.List;
 import static java.util.stream.Collectors.toList;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Name;
@@ -137,8 +140,32 @@ public class MethodTest {
   
   @Test
   void generatesParametersSignature() {
-    mockParameters(el, new Parameter(Dto.class, "myDto"), new Parameter(Model.class, "myModel"));
-    assertEquals("MethodTest.Dto myDto, MethodTest.Model myModel", method.generateParametersSignature());
+    mockParameters(el, 
+        new Parameter(CustomSession.class, "mySession"), 
+        new Parameter(Dto.class, "myDto"), 
+        new Parameter(Object.class, "myObject"),
+        new Parameter(Model.class, "myModel"),
+        new Parameter(Double.class, "account"));
+    assertEquals("CustomSession mySession, Object myObject, Double account", method.generateParametersSignature());
+  }
+  
+  @Test
+  void generatesParametersSignatureWithoutExtraParams() {
+    mockParameters(el, new Parameter(Model.class, "model"), new Parameter(Dto.class, "dto"));
+    assertEquals("", method.generateParametersSignature());
+  }
+  
+  @Test
+  void getsNonModelAndDtoParams() {
+    mockParameters(el,
+        new Parameter(CustomSession.class, "session"),
+        new Parameter(Dto.class, "dto"),
+        new Parameter(Model.class, "model"),
+        new Parameter(HttpServletRequest.class, "request"));
+    var extraParameters = List.of(
+        "io.github.vpdavid.scrud.util.CustomSession",
+        "jakarta.servlet.http.HttpServletRequest");
+    assertEquals(extraParameters, method.getNonModelAndDtoParams());
   }
   
   @Test

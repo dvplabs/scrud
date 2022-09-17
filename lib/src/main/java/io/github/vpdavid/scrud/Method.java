@@ -1,9 +1,13 @@
 package io.github.vpdavid.scrud;
 
+import java.util.List;
 import static java.util.stream.Collectors.joining;
+import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
+import java.util.stream.Stream;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ExecutableElement;
+import javax.lang.model.element.VariableElement;
 import lombok.Getter;
 
 
@@ -60,8 +64,22 @@ public class Method {
 
   public String generateParametersSignature() {
     return el.getParameters().stream()
+        .filter(p -> !modelType.getFullName().equals(p.asType().toString()))
+        .filter(p -> !dtoType.getFullName().equals(p.asType().toString()))
         .map(p -> new TypeName(p.asType().toString()).getSimpleName() + " " + p.toString())
         .collect(joining(", "));
+  }
+  
+  private Stream<? extends VariableElement> parametersWithoutModelAndDto() {
+    return el.getParameters().stream()
+        .filter(p -> !modelType.getFullName().equals(p.asType().toString()))
+        .filter(p -> !dtoType.getFullName().equals(p.asType().toString()));
+  }
+  
+  public List<String> getNonModelAndDtoParams() {
+    return parametersWithoutModelAndDto()
+        .map(p -> p.asType().toString())
+        .collect(toList());
   }
 
   public String generateArgumentsSignature() {

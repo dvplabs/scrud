@@ -1,7 +1,8 @@
   @DeleteMapping(path = "/{id}")
   @ResponseStatus(HttpStatus.OK)
   @Transactional
-  public void delete(@PathVariable Long id) {
+  <#assign params = method.generateParametersSignature()>
+  public void delete(@PathVariable Long id<#if params?length gt 0>, ${params}</#if>) {
     var ${method.modelName} = entityManager.find(${method.modelType.simpleName}.class, id);
     if (Objects.isNull(${method.modelName})) {
       throw new EntityNotFoundException("Entity not found");
