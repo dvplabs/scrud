@@ -46,11 +46,17 @@ public class CrudGeneratorTest {
   }
   
   @Test
-  void errorWhenNoAvailableMethod() throws IOException {
+  void errorWhenNoAvailableMethodForVerb() throws IOException {
+    failsWithMessage(
+        "example/input/mapper/MissingPutMapper.java",
+        "No suitable method found for PUT operation.");
+  }
+
+  void failsWithMessage(String file, String msg) throws IOException {
     var files = Stream.of(
-          "example/input/model/Product.java", 
-          "example/input/dto/ProductDto.java",
-          "example/input/mapper/MissingPutMapper.java")
+        "example/input/model/Product.java",
+        "example/input/dto/ProductDto.java",
+        file)
         .map(JavaFileObjects::forResource)
         .collect(toList());
     
@@ -59,8 +65,14 @@ public class CrudGeneratorTest {
         .withClasspath(classPath)
         .compile(files);
     
-    assertThat(compilation)
-        .hadErrorContaining("No suitable method found to PUT operation.");
+    assertThat(compilation).hadErrorContaining(msg);
+  }
+  
+  @Test
+  void errorWhenTooManyMethodsForVerb() throws IOException {
+    failsWithMessage(
+        "example/input/mapper/TooManyGetsMapper.java", 
+        "Too many methods found for GET operation: toDto, transform.");
   }
   
   void generateController(String mapperPath, String resultPath) throws IOException {

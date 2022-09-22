@@ -139,6 +139,15 @@ public class CrudGenerator extends AbstractProcessor {
       throw new InvalidCrudDefinitionException(String.join("\n", missingVerbs));
     }
     
+    var tooMany = val.verbProcessors.stream()
+        .filter(processor -> foundMethods.get(processor).size() > 1)
+        .map(processor -> processor.getVerb().getTooManyMethodsMsg(foundMethods.get(processor)))
+        .collect(toList());
+    
+    if (!tooMany.isEmpty()) {
+      throw new InvalidCrudDefinitionException(String.join("\n", tooMany));
+    }
+    
     var verbs = val.verbProcessors.stream()
         .map(processor -> new Pair(foundMethods.get(processor).get(0), processor))
         .collect(toList());

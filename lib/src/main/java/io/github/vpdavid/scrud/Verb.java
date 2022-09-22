@@ -4,7 +4,10 @@
  */
 package io.github.vpdavid.scrud;
 
+import static java.lang.String.format;
+import java.util.List;
 import java.util.function.Function;
+import static java.util.stream.Collectors.joining;
 import java.util.stream.Stream;
 import lombok.Getter;
 
@@ -17,43 +20,46 @@ public enum Verb {
   GET(method -> 
         method.containsParameterModel() &&
         !method.containsParameterDto() &&
-        method.isReturnTypeDto(),
-      "No suitable method found to GET operation."),
+        method.isReturnTypeDto()),
       
   GET_ALL(method -> 
         method.containsParameterModel() &&
         !method.containsParameterDto() &&
-        method.isReturnTypeDto(),
-      "No suitable method found to GET_ALL operation."), 
+        method.isReturnTypeDto()), 
   
   POST(method -> 
         method.containsParameterModel() &&
         method.containsParameterDto() &&
-        method.isReturnTypeVoid(),
-      "No suitable method found to POST operation."),
+        method.isReturnTypeVoid()),
   
   PUT(method -> 
         method.containsParameterModel() &&
         method.containsParameterDto() &&
-        method.isReturnTypeVoid(),
-      "No suitable method found to PUT operation."), 
+        method.isReturnTypeVoid()), 
   
   DELETE(method -> 
         method.containsParameterModel() &&
         !method.containsParameterDto() &&
-        method.isReturnTypeVoid(),
-      "No suitable method found to DELETE operation.");
+        method.isReturnTypeVoid());
   
-  private Verb(Function<Method, Boolean> verifier, String missingMethodMsg) {
+  private Verb(Function<Method, Boolean> verifier) {
     this.verifier = verifier;
-    this.missingMethodMsg = missingMethodMsg;
   }
   
   private final Function<Method, Boolean> verifier;
-  @Getter
-  private final String missingMethodMsg;
   
   public boolean validFor(Method method) {
     return verifier.apply(method);
+  }
+  
+  public String getMissingMethodMsg() {
+    return format("No suitable method found for %s operation.", name());
+  }
+  
+  public String getTooManyMethodsMsg(List<Method> methods) {
+    return format(
+        "Too many methods found for %s operation: %s.", 
+        name(), 
+        methods.stream().map(Method::getName).collect(joining(", ")));
   }
 }
