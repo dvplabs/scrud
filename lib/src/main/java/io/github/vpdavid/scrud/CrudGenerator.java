@@ -121,29 +121,39 @@ public class CrudGenerator extends AbstractProcessor {
     return values;
   }
   
-  private Map<VerbProcessor, List<Method>> findAvailableMethods(Element el, AnnotationValues val) {
-    return el.getEnclosedElements().stream()
+  private List<Pair> findAvailableMethods(Element el, AnnotationValues val) {
+    var foundMethods = el.getEnclosedElements().stream()
             .filter(element -> element.getKind() == ElementKind.METHOD)
             .map(methodDef -> new Method(methodDef, val.model.getFullName(), val.dto.getFullName()))
             .flatMap(method -> val.verbProcessors.stream().map(verb -> new Pair(method, verb)))
             .filter(pair -> pair.processor.getVerb().validFor(pair.method))
             .collect(groupingBy(Pair::getProcessor,
                 mapping(Pair::getMethod, toList())));
+    
+    var missingVerbs = val.verbProcessors.stream()
+        .filter(processor -> !foundMethods.containsKey(processor))
+        .map(processor -> processor.getVerb().getMissingMethodMsg())
+        .collect(toList());
+    
+    if (!missingVerbs.isEmpty()) {
+      throw new InvalidCrudDefinitionException(String.join("\n", missingVerbs));
+    }
+    
+    var verbs = val.verbProcessors.stream()
+        .map(processor -> new Pair(foundMethods.get(processor).get(0), processor))
+        .collect(toList());
+    return verbs;
   }
 
   private void writeToFile(
       TypeName clazz,
       AnnotationValues val,
-      Map<VerbProcessor, List<Method>> methods) throws IOException, TemplateException {
+      List<Pair> methods) throws IOException, TemplateException {
     String className = findResourceName(val.resource);
     var file = processingEnv.getFiler().createSourceFile(
         clazz.getPackageName() + format(".%sCrudController", className));
     
-    var verbs = val.verbProcessors.stream()
-        .map(processor -> new Pair(methods.get(processor).get(0), processor))
-        .collect(toList());
-    
-    var extraImports = verbs.stream()
+    var extraImports = methods.stream()
           .flatMap(p -> p.method.getNonModelAndDtoParams().stream())
           .distinct()
           .sorted()
@@ -158,7 +168,7 @@ public class CrudGenerator extends AbstractProcessor {
       writer.println("");
       writer.println(format(CLASS_DECLARATION, val.resource, className, clazz.getSimpleName()));
       
-      for (var v : verbs) {
+      for (var v : methods) {
         var src = v.processor.generateSourceCode(v.method);
         writer.println(src);
       }

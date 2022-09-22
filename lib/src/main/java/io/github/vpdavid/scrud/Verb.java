@@ -5,6 +5,8 @@
 package io.github.vpdavid.scrud;
 
 import java.util.function.Function;
+import java.util.stream.Stream;
+import lombok.Getter;
 
 
 /**
@@ -13,31 +15,43 @@ import java.util.function.Function;
  */
 public enum Verb {
   GET(method -> 
-      method.containsParameterModel() &&
-      !method.containsParameterDto() &&
-      method.isReturnTypeDto()),
+        method.containsParameterModel() &&
+        !method.containsParameterDto() &&
+        method.isReturnTypeDto(),
+      "No suitable method found to GET operation."),
+      
   GET_ALL(method -> 
-      method.containsParameterModel() &&
-      !method.containsParameterDto() &&
-      method.isReturnTypeDto()), 
-  POST(method -> 
-      method.containsParameterModel() &&
-      method.containsParameterDto() &&
-      method.isReturnTypeVoid()), 
-  PUT(method -> 
-      method.containsParameterModel() &&
-      method.containsParameterDto() &&
-      method.isReturnTypeVoid()), 
-  DELETE(method -> 
-      method.containsParameterModel() &&
-      !method.containsParameterDto() &&
-      method.isReturnTypeVoid());
+        method.containsParameterModel() &&
+        !method.containsParameterDto() &&
+        method.isReturnTypeDto(),
+      "No suitable method found to GET_ALL operation."), 
   
-  private Verb(Function<Method, Boolean> verifier) {
+  POST(method -> 
+        method.containsParameterModel() &&
+        method.containsParameterDto() &&
+        method.isReturnTypeVoid(),
+      "No suitable method found to POST operation."),
+  
+  PUT(method -> 
+        method.containsParameterModel() &&
+        method.containsParameterDto() &&
+        method.isReturnTypeVoid(),
+      "No suitable method found to PUT operation."), 
+  
+  DELETE(method -> 
+        method.containsParameterModel() &&
+        !method.containsParameterDto() &&
+        method.isReturnTypeVoid(),
+      "No suitable method found to DELETE operation.");
+  
+  private Verb(Function<Method, Boolean> verifier, String missingMethodMsg) {
     this.verifier = verifier;
+    this.missingMethodMsg = missingMethodMsg;
   }
   
   private final Function<Method, Boolean> verifier;
+  @Getter
+  private final String missingMethodMsg;
   
   public boolean validFor(Method method) {
     return verifier.apply(method);

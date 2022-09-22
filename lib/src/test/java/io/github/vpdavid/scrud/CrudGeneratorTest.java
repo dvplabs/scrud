@@ -45,6 +45,24 @@ public class CrudGeneratorTest {
     generateController("example/input/mapper/MapperWithExtraParams.java", "example/output/ControllerWithExtraParams.java");
   }
   
+  @Test
+  void errorWhenNoAvailableMethod() throws IOException {
+    var files = Stream.of(
+          "example/input/model/Product.java", 
+          "example/input/dto/ProductDto.java",
+          "example/input/mapper/MissingPutMapper.java")
+        .map(JavaFileObjects::forResource)
+        .collect(toList());
+    
+    Compilation compilation = javac()
+        .withProcessors(new CrudGenerator())
+        .withClasspath(classPath)
+        .compile(files);
+    
+    assertThat(compilation)
+        .hadErrorContaining("No suitable method found to PUT operation.");
+  }
+  
   void generateController(String mapperPath, String resultPath) throws IOException {
     var files = Stream.of(
           "example/input/model/Product.java", 
