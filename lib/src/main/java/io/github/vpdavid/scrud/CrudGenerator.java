@@ -21,6 +21,7 @@ import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
 import static java.util.stream.Collectors.mapping;
+import java.util.stream.Stream;
 import javax.annotation.processing.AbstractProcessor;
 import javax.annotation.processing.Processor;
 import javax.annotation.processing.RoundEnvironment;
@@ -43,19 +44,11 @@ public class CrudGenerator extends AbstractProcessor {
 
   private final Pattern PATH_RESOURCE_NAME_PATTERN = Pattern.compile("^.*/([^/]+)$");
   private final String PACKAGE_DECLARATION = "package %s;\n";
-  private final String COMMOM_IMPORTS
-      = "import java.util.*;\n"
-      + "import java.util.stream.*;\n"
-      + "import javax.persistence.*;\n"
-      + "import javax.persistence.criteria.Order;\n"
-      + "import org.springframework.beans.factory.annotation.Autowired;\n"
-      + "import org.springframework.data.domain.*;\n"
-      + "import org.springframework.http.HttpStatus;\n"
-      + "import org.springframework.transaction.annotation.Transactional;\n"
-      + "import org.springframework.web.bind.annotation.*;\n";
-  private final String INPUT_IMPORTS
-      = "import %s;\n"
-      + "import %s;\n";
+  private final List<String> BASIC_IMPORTS = List.of(
+      "org.springframework.web.bind.annotation.RestController",
+      "org.springframework.web.bind.annotation.RequestMapping",
+      "org.springframework.beans.factory.annotation.Autowired",
+      "javax.persistence.EntityManager");
   private final String CLASS_DECLARATION
       = "@RestController\n"
       + "@RequestMapping(path = \"%s\")\n"
@@ -162,18 +155,19 @@ public class CrudGenerator extends AbstractProcessor {
     var file = processingEnv.getFiler().createSourceFile(
         clazz.getPackageName() + format(".%sCrudController", className));
     
-    var extraImports = methods.stream()
-          .flatMap(p -> p.method.getNonModelAndDtoParams().stream())
-          .distinct()
-          .sorted()
-          .map(i -> "import " + i + ";")
-          .collect(joining("\n"));
+    var imports = Stream.of(
+          methods.stream().flatMap(p -> p.processor.getVerb().getDependencies().stream()),
+          methods.stream().flatMap(p -> p.method.getDependencies().stream()),
+          BASIC_IMPORTS.stream())
+        .flatMap(Function.identity())
+        .distinct()
+        .map(dep -> "import " + dep + ";")
+        .sorted()
+        .collect(joining("\n"));
 
     try ( var writer = new PrintWriter(file.openWriter())) {
       writer.println(format(PACKAGE_DECLARATION, clazz.getPackageName()));
-      writer.println(COMMOM_IMPORTS);
-      writer.println(format(INPUT_IMPORTS, val.model.getFullName(), val.dto.getFullName()));
-      writer.println(extraImports);
+      writer.println(imports);
       writer.println("");
       writer.println(format(CLASS_DECLARATION, val.resource, className, clazz.getSimpleName()));
       
@@ -197,13 +191,11 @@ public class CrudGenerator extends AbstractProcessor {
   @AllArgsConstructor
   @Getter
   static class Pair {
-
     Method method;
     VerbProcessor processor;
   }
 
   static class AnnotationValues {
-
     String resource;
     List<VerbProcessor> verbProcessors;
     TypeName model;

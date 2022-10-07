@@ -1,53 +1,5 @@
-* dependencies for class
-import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.beans.factory.annotation.Autowired;
-import javax.persistence.EntityManager;
-import io.github.vpdavid.scrud.sample.ProductMapper;
-
-* dependencies for get-all
-import java.util.ArrayList;
-import java.util.stream.Collectors;
-import javax.persistence.criteria.Order;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.Pageable;
-import org.springframework.http.HttpStatus;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ResponseStatus;
-
-* dependencies for get
-import java.util.Objects;
-import javax.persistence.EntityNotFoundException;
-import org.springframework.http.HttpStatus;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.ResponseStatus;
-
-* dependencies for post
-import org.springframework.http.HttpStatus;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.ResponseStatus;
-
-* dependencies for put
-import java.util.Objects;
-import javax.persistence.EntityNotFoundException;
-import org.springframework.http.HttpStatus;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.ResponseStatus;
-
-* dependencies for delete
-import java.util.Objects;
-import javax.persistence.EntityNotFoundException;
-import org.springframework.http.HttpStatus;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.ResponseStatus;
+* (done) Include imports utilized by methods
+* name clash avoiding (Using full name of clashing names)
+* Add @Generated annotation
+* accept resource name with more than one slash
+* Support for @Valid and @Validated

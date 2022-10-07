@@ -32,17 +32,23 @@ public class CrudGeneratorTest {
   
   @Test
   void generateFullControllerForResource() throws IOException {
-    generateController("example/input/mapper/BasicMapper.java", "example/output/BasicController.java");
+    generateController(
+        "example/input/mapper/BasicMapper.java", 
+        "example/output/BasicController.java");
   }
   
   @Test
   void generatePartialControllerForResource() throws IOException {
-    generateController("example/input/mapper/PartialMapper.java", "example/output/PartialController.java");
+    generateController(
+        "example/input/mapper/PartialMapper.java", 
+        "example/output/PartialController.java");
   }
   
   @Test
   void generateControllerWithExtraParams() throws IOException {
-    generateController("example/input/mapper/MapperWithExtraParams.java", "example/output/ControllerWithExtraParams.java");
+    generateController(
+        "example/input/mapper/MapperWithExtraParams.java", 
+        "example/output/ControllerWithExtraParams.java");
   }
   
   @Test
@@ -51,7 +57,14 @@ public class CrudGeneratorTest {
         "example/input/mapper/MissingPutMapper.java",
         "No suitable method found for PUT operation.");
   }
-
+  
+  @Test
+  void errorWhenTooManyMethodsForVerb() throws IOException {
+    failsWithMessage(
+        "example/input/mapper/TooManyGetsMapper.java", 
+        "Too many methods found for GET operation: toDto, transform.");
+  }
+  
   void failsWithMessage(String file, String msg) throws IOException {
     var files = Stream.of(
         "example/input/model/Product.java",
@@ -66,13 +79,6 @@ public class CrudGeneratorTest {
         .compile(files);
     
     assertThat(compilation).hadErrorContaining(msg);
-  }
-  
-  @Test
-  void errorWhenTooManyMethodsForVerb() throws IOException {
-    failsWithMessage(
-        "example/input/mapper/TooManyGetsMapper.java", 
-        "Too many methods found for GET operation: toDto, transform.");
   }
   
   void generateController(String mapperPath, String resultPath) throws IOException {

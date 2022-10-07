@@ -70,15 +70,10 @@ public class Method {
         .collect(joining(", "));
   }
   
-  private Stream<? extends VariableElement> parametersWithoutModelAndDto() {
+  public List<String> getDependencies() {
     return el.getParameters().stream()
-        .filter(p -> !modelType.getFullName().equals(p.asType().toString()))
-        .filter(p -> !dtoType.getFullName().equals(p.asType().toString()));
-  }
-  
-  public List<String> getNonModelAndDtoParams() {
-    return parametersWithoutModelAndDto()
         .map(p -> p.asType().toString())
+        .map(dep -> dep.replaceAll("\\$", "."))
         .collect(toList());
   }
 

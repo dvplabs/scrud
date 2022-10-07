@@ -46,7 +46,8 @@ public class MethodTest {
     var list = Arrays.stream(clazz)
         .map(c -> new Pair(mock(VariableElement.class), new Parameter(c, "n1")))
         .collect(toList());
-    when(el.getParameters()).thenAnswer(m -> list.stream().map(Pair::getVariableElement).collect(toList()));
+    when(el.getParameters())
+        .thenAnswer(m -> list.stream().map(Pair::getVariableElement).collect(toList()));
     list.forEach(p -> {
       var tm = mock(TypeMirror.class);
       when(p.getVariableElement().asType()).thenReturn(tm);
@@ -156,7 +157,7 @@ public class MethodTest {
   }
   
   @Test
-  void getsNonModelAndDtoParams() {
+  void getDependencies() {
     mockParameters(el,
         new Parameter(CustomSession.class, "session"),
         new Parameter(Dto.class, "dto"),
@@ -164,8 +165,10 @@ public class MethodTest {
         new Parameter(HttpServletRequest.class, "request"));
     var extraParameters = List.of(
         "io.github.vpdavid.scrud.util.CustomSession",
+        "io.github.vpdavid.scrud.MethodTest.Dto",
+        "io.github.vpdavid.scrud.MethodTest.Model",
         "jakarta.servlet.http.HttpServletRequest");
-    assertEquals(extraParameters, method.getNonModelAndDtoParams());
+    assertEquals(extraParameters, method.getDependencies());
   }
   
   @Test
