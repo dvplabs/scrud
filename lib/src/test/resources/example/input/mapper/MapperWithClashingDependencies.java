@@ -1,0 +1,21 @@
+package example.input.mapper;
+
+import io.github.vpdavid.scrud.*;
+import io.github.vpdavid.scrud.util.PutMapping;
+
+@Crud(resource = "/v1/products",  
+    model = example.input.model.Product.class, 
+    dto = example.input.dto.Product.class)
+public interface MapperWithClashingDependencies {
+  
+  example.input.dto.Product toDto(example.input.model.Product model);
+  
+  void updateEntity(
+      example.input.model.Product myModel, 
+      example.input.dto.Product myDto, 
+      /*Custom class*/ PutMapping data);
+  
+  void assertRemovable(example.input.model.Product model);
+
+  
+}

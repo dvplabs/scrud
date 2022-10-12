@@ -53,7 +53,8 @@ public class Method {
     var providedModel = el.getParameters().stream()
         .filter(p -> clazzName.equals(p.asType().toString()))
         .findFirst()
-        .orElseThrow(() -> new IllegalStateException("Parameter of tye " + modelType.getSimpleName() + " does not exist"));
+        .orElseThrow(() -> new IllegalStateException(
+            "Parameter of tye " + modelType.getSimpleName() + " does not exist"));
     
     return providedModel.toString();
   }

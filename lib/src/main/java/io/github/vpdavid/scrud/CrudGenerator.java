@@ -116,12 +116,12 @@ public class CrudGenerator extends AbstractProcessor {
   
   private List<Pair> findAvailableMethods(Element el, AnnotationValues val) {
     var foundMethods = el.getEnclosedElements().stream()
-            .filter(element -> element.getKind() == ElementKind.METHOD)
-            .map(methodDef -> new Method(methodDef, val.model.getFullName(), val.dto.getFullName()))
-            .flatMap(method -> val.verbProcessors.stream().map(verb -> new Pair(method, verb)))
-            .filter(pair -> pair.processor.getVerb().validFor(pair.method))
-            .collect(groupingBy(Pair::getProcessor,
-                mapping(Pair::getMethod, toList())));
+        .filter(element -> element.getKind() == ElementKind.METHOD)
+        .map(methodDef -> new Method(methodDef, val.model.getFullName(), val.dto.getFullName()))
+        .flatMap(method -> val.verbProcessors.stream().map(verb -> new Pair(method, verb)))
+        .filter(pair -> pair.processor.getVerb().validFor(pair.method))
+        .collect(groupingBy(Pair::getProcessor,
+            mapping(Pair::getMethod, toList())));
     
     var missingVerbs = val.verbProcessors.stream()
         .filter(processor -> !foundMethods.containsKey(processor))

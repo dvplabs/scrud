@@ -65,6 +65,13 @@ public class CrudGeneratorTest {
         "Too many methods found for GET operation: toDto, transform.");
   }
   
+  @Test
+  void avoidsNameClashing() throws IOException {
+    generateController(
+        "example/input/mapper/MapperWithClashingDependencies.java", 
+        "example/output/ControllerClashingDependencies.java");
+  }
+  
   void failsWithMessage(String file, String msg) throws IOException {
     var files = Stream.of(
         "example/input/model/Product.java",
