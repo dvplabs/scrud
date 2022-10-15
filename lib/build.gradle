@@ -26,8 +26,8 @@ dependencies {
     testImplementation 'javax.persistence:javax.persistence-api:2.2'
     testImplementation 'org.springframework.data:spring-data-jpa:2.7.2'
     testImplementation 'jakarta.servlet:jakarta.servlet-api:6.0.0'
+    testImplementation 'org.assertj:assertj-core:3.11.1'
 
-    
     implementation 'org.freemarker:freemarker:2.3.31'
 
     implementation 'com.google.auto.service:auto-service:1.0.1'

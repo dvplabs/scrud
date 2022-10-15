@@ -15,7 +15,7 @@ import static java.util.stream.Collectors.toList;
  *
  * @author david
  */
-public class DependencyConciliator {
+public class DependencyConciliator implements ConflictDetector {
   private static Pattern nameRegex = Pattern.compile("^.*\\.(?!\\.)([A-Z][a-zA-Z0-9]*)$");
   private Map<String, Map<String, Type>> dependencies = new HashMap<>();
 
@@ -36,7 +36,8 @@ public class DependencyConciliator {
     }
   }
   
-  public boolean nameClash(String typeName) {
+  @Override
+  public boolean isNameClash(String typeName) {
     var name = findSimpleName(typeName);
     return dependencies.containsKey(name) && dependencies.get(name).get(typeName) == Type.CLASH;
   }

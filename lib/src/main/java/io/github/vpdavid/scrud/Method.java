@@ -18,8 +18,8 @@ import lombok.Getter;
 public class Method {
 
   private ExecutableElement el;
-  @Getter
   private TypeName modelType, dtoType;
+  private ConflictDetector conflictDetector;
   
   public Method(Element el, String modelType, String dtoType) {
     if (el instanceof ExecutableElement) {
@@ -34,13 +34,20 @@ public class Method {
   }
   
   public TypeName getReturnType() {
-    return new TypeName(el.getReturnType().toString());
+    assertContextExists();
+    return new TypeName(el.getReturnType().toString(), conflictDetector);
+  }
+  
+  private void assertContextExists() {
+    if (conflictDetector == null) {
+      throw new IllegalStateException("No context defined");
+    }
   }
 
   private boolean containsParameterType(String typeName) {
     var params = el.getParameters().stream()
           .map(Element::asType)
-          .map(Object::toString)
+          .map(o -> new TypeName(o.toString()).getFullName())
           .collect(toSet());
     return params.contains(typeName);
   }
@@ -51,7 +58,10 @@ public class Method {
   
   private String getParameterName(String clazzName) {
     var providedModel = el.getParameters().stream()
-        .filter(p -> clazzName.equals(p.asType().toString()))
+        .filter(p -> {
+          var type = new TypeName(p.asType().toString());
+          return type.getFullName().equals(clazzName);
+        })
         .findFirst()
         .orElseThrow(() -> new IllegalStateException(
             "Parameter of tye " + modelType.getSimpleName() + " does not exist"));
@@ -64,10 +74,14 @@ public class Method {
   }
 
   public String generateParametersSignature() {
+    assertContextExists();
     return el.getParameters().stream()
-        .filter(p -> !modelType.getFullName().equals(p.asType().toString()))
-        .filter(p -> !dtoType.getFullName().equals(p.asType().toString()))
-        .map(p -> new TypeName(p.asType().toString()).getSimpleName() + " " + p.toString())
+        .filter(p -> !modelType.getFullName().equals(
+            new TypeName(p.asType().toString()).getFullName()))
+        .filter(p -> !dtoType.getFullName().equals(
+            new TypeName(p.asType().toString()).getFullName()))
+        .map(p -> new TypeName(p.asType().toString(), conflictDetector).getName() 
+            + " " + p.toString())
         .collect(joining(", "));
   }
   
@@ -93,11 +107,26 @@ public class Method {
   }
 
   public boolean isReturnTypeDto() {
-    return getReturnType().equals(dtoType);
+    return new TypeName(el.getReturnType().toString()).getFullName().equals(dtoType.getFullName());
   }
 
   public boolean isReturnTypeVoid() {
-    return getReturnType().getFullName().equals("void");
+    return new TypeName(el.getReturnType().toString()).getFullName().equals("void");
   }
   
+  public Method withContext(ConflictDetector detector) {
+    var m = new Method(el, modelType.getFullName(), dtoType.getFullName());
+    m.conflictDetector = detector;
+    return m;
+  }
+  
+  public TypeName getDtoType() {
+    assertContextExists();
+    return new TypeName(dtoType.getFullName(), conflictDetector);
+  }
+  
+  public TypeName getModelType() {
+    assertContextExists();
+    return new TypeName(modelType.getFullName(), conflictDetector);
+  }
 }

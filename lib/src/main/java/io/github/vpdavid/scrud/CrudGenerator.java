@@ -43,6 +43,7 @@ import lombok.Getter;
 public class CrudGenerator extends AbstractProcessor {
 
   private final Pattern PATH_RESOURCE_NAME_PATTERN = Pattern.compile("^.*/([^/]+)$");
+  private final Pattern ENUM_NAME_PATTERN = Pattern.compile("^.*\\.([^.]+)$");
   private final String PACKAGE_DECLARATION = "package %s;\n";
   private final List<String> BASIC_IMPORTS = List.of(
       "org.springframework.web.bind.annotation.RestController",
@@ -106,7 +107,7 @@ public class CrudGenerator extends AbstractProcessor {
     values.resource = (String) defaults.get("resource").getValue();
     values.verbProcessors = ((List<?>) defaults.get("verbs").getValue()).stream()
         .map(Object::toString)
-        .map(ss -> Verb.valueOf(new TypeName(ss).getSimpleName()))
+        .map(this::getEnumName)
         .map(processors::get)
         .collect(toList());
     values.model = new TypeName(defaults.get("model").getValue().toString());
@@ -155,12 +156,18 @@ public class CrudGenerator extends AbstractProcessor {
     var file = processingEnv.getFiler().createSourceFile(
         clazz.getPackageName() + format(".%sCrudController", className));
     
-    var imports = Stream.of(
+    var conciliator = new DependencyConciliator();
+    var deps = Stream.of(
+          BASIC_IMPORTS.stream(),
           methods.stream().flatMap(p -> p.processor.getVerb().getDependencies().stream()),
-          methods.stream().flatMap(p -> p.method.getDependencies().stream()),
-          BASIC_IMPORTS.stream())
+          methods.stream().flatMap(p -> p.method.getDependencies().stream()))
         .flatMap(Function.identity())
-        .distinct()
+        .collect(toList());
+    conciliator.addDependencies(deps);
+    
+    conciliator.getNonClashing();
+    
+    var imports = conciliator.getNonClashing().stream()
         .map(dep -> "import " + dep + ";")
         .sorted()
         .collect(joining("\n"));
@@ -172,7 +179,7 @@ public class CrudGenerator extends AbstractProcessor {
       writer.println(format(CLASS_DECLARATION, val.resource, className, clazz.getSimpleName()));
       
       for (var v : methods) {
-        var src = v.processor.generateSourceCode(v.method);
+        var src = v.processor.generateSourceCode(v.method, conciliator);
         writer.println(src);
       }
 
@@ -186,6 +193,12 @@ public class CrudGenerator extends AbstractProcessor {
     var resourceName = matcher.group(1);
     String className = resourceName.substring(0, 1).toUpperCase() + resourceName.substring(1);
     return className;
+  }
+  
+  private Verb getEnumName(String clazz) {
+    var matcher = ENUM_NAME_PATTERN.matcher(clazz);
+    matcher.find();
+    return Verb.valueOf(matcher.group(1));
   }
 
   @AllArgsConstructor

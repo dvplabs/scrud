@@ -69,7 +69,7 @@ public class CrudGeneratorTest {
   void avoidsNameClashing() throws IOException {
     generateController(
         "example/input/mapper/MapperWithClashingDependencies.java", 
-        "example/output/ControllerClashingDependencies.java");
+        "example/output/ControllerWithClashingDependencies.java");
   }
   
   void failsWithMessage(String file, String msg) throws IOException {

@@ -1,9 +1,6 @@
 package example.input.mapper;
 
-import example.input.dto.ProductDto;
 import example.input.model.Product;
-import io.github.vpdavid.scrud.util.CustomSession;
-import jakarta.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -38,7 +35,7 @@ public class ProductsCrudController {
   @GetMapping
   @ResponseStatus(HttpStatus.OK)
   @Transactional(readOnly = true)
-  public Page<ProductDto> read(Pageable pageable, CustomSession mySession) {
+  public Page<example.input.dto.Product> read(Pageable pageable) {
     var cb = entityManager.getCriteriaBuilder();
 
     var cqTotal = cb.createQuery(Long.class);
@@ -65,7 +62,7 @@ public class ProductsCrudController {
     query.setFirstResult(pageable.getPageNumber() * pageable.getPageSize());
     query.setMaxResults(pageable.getPageSize());
     var results = query.getResultList().stream()
-      .map(model -> mapper.toDto(mySession, model))
+      .map(model -> mapper.toDto(model))
       .collect(Collectors.toList());
     return new PageImpl(results, pageable, total);
   }
@@ -73,46 +70,46 @@ public class ProductsCrudController {
   @GetMapping(path = "/{id}")
   @ResponseStatus(HttpStatus.OK)
   @Transactional(readOnly = true)
-  public ProductDto read(@PathVariable Long id, CustomSession mySession) {
+  public example.input.dto.Product read(@PathVariable Long id) {
     var model = entityManager.find(Product.class, id);
     if (Objects.isNull(model)) {
       throw new EntityNotFoundException("Entity not found");
     }
 
-    return mapper.toDto(mySession, model);
+    return mapper.toDto(model);
   }
 
   @PostMapping
   @ResponseStatus(HttpStatus.CREATED)
   @Transactional
-  public void create(@RequestBody ProductDto someDto, CustomSession customSession, HttpServletRequest request) {
-    var someModel = new Product();
-    mapper.updateEntity(someDto, customSession, someModel, request);
-    entityManager.persist(someModel);
+  public void create(@RequestBody example.input.dto.Product myDto, io.github.vpdavid.scrud.util.PutMapping data) {
+    var myModel = new Product();
+    mapper.updateEntity(myModel, myDto, data);
+    entityManager.persist(myModel);
   }
 
   @PutMapping(path = "/{id}")
   @ResponseStatus(HttpStatus.OK)
   @Transactional
-  public void update(@RequestBody ProductDto someDto, @PathVariable Long id, CustomSession customSession, HttpServletRequest request) {
-    var someModel = entityManager.find(Product.class, id);
-    if (Objects.isNull(someModel)) {
-      throw new EntityNotFoundException("Entity not found");
-    }
-
-    mapper.updateEntity(someDto, customSession, someModel, request);
-  }
-
-  @DeleteMapping(path = "/{id}")
-  @ResponseStatus(HttpStatus.OK)
-  @Transactional
-  public void delete(@PathVariable Long id, CustomSession session) {
+  public void update(@RequestBody example.input.dto.Product myDto, @PathVariable Long id, io.github.vpdavid.scrud.util.PutMapping data) {
     var myModel = entityManager.find(Product.class, id);
     if (Objects.isNull(myModel)) {
       throw new EntityNotFoundException("Entity not found");
     }
 
-    mapper.assertDelete(myModel, session);
-    entityManager.remove(myModel);
+    mapper.updateEntity(myModel, myDto, data);
+  }
+
+  @DeleteMapping(path = "/{id}")
+  @ResponseStatus(HttpStatus.OK)
+  @Transactional
+  public void delete(@PathVariable Long id) {
+    var model = entityManager.find(Product.class, id);
+    if (Objects.isNull(model)) {
+      throw new EntityNotFoundException("Entity not found");
+    }
+
+    mapper.assertRemovable(model);
+    entityManager.remove(model);
   }
 }

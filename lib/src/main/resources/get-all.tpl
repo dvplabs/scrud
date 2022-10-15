@@ -2,15 +2,15 @@
   @ResponseStatus(HttpStatus.OK)
   @Transactional(readOnly = true)
   <#assign params = method.generateParametersSignature()>
-  public Page<${method.returnType.simpleName}> read(Pageable pageable<#if params?length gt 0>, ${params}</#if>) {
+  public Page<${method.returnType.name}> read(Pageable pageable<#if params?length gt 0>, ${params}</#if>) {
     var cb = entityManager.getCriteriaBuilder();
 
     var cqTotal = cb.createQuery(Long.class);
-    var selectTotal = cqTotal.select(cb.count(cqTotal.from(${method.modelType.simpleName}.class)));
+    var selectTotal = cqTotal.select(cb.count(cqTotal.from(${method.modelType.name}.class)));
     Long total = entityManager.createQuery(selectTotal).getSingleResult();
 
-    var cq = cb.createQuery(${method.modelType.simpleName}.class);
-    var root = cq.from(${method.modelType.simpleName}.class);
+    var cq = cb.createQuery(${method.modelType.name}.class);
+    var root = cq.from(${method.modelType.name}.class);
     cq.select(root);
 
     if (pageable.getSort().isSorted()) {

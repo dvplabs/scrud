@@ -23,6 +23,8 @@ import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import org.mockito.junit.jupiter.MockitoExtension;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @ExtendWith(MockitoExtension.class)
 public class MethodTest {
@@ -38,8 +40,8 @@ public class MethodTest {
   
   static void mockReturnType(ExecutableElement el, String clazz) {
     TypeMirror returnType = mock(TypeMirror.class);
-    when(el.getReturnType()).thenReturn(returnType);
-    when(returnType.toString()).thenReturn(clazz);
+    lenient().when(el.getReturnType()).thenReturn(returnType);
+    lenient().when(returnType.toString()).thenReturn(clazz);
   }
   
   static void mockParameter(ExecutableElement el, Class<?>...clazz) {
@@ -59,7 +61,7 @@ public class MethodTest {
     var variables = Arrays.stream(params)
         .map(MethodTest::prepareMock)
         .collect(toList());
-   doReturn(variables).when(el).getParameters(); 
+   lenient().doReturn(variables).when(el).getParameters(); 
   }
   
   static VariableElement prepareMock(Parameter param) {
@@ -87,12 +89,6 @@ public class MethodTest {
   static class Parameter {
     Class<?> clazz;
     String name;
-  }
-  
-  @Test
-  void returnsTypeResponse() {
-    mockReturnType(el, Integer.class.getName());
-    assertEquals("java.lang.Integer", method.getReturnType().getFullName());
   }
   
   @Test
@@ -147,13 +143,17 @@ public class MethodTest {
         new Parameter(Object.class, "myObject"),
         new Parameter(Model.class, "myModel"),
         new Parameter(Double.class, "account"));
-    assertEquals("CustomSession mySession, Object myObject, Double account", method.generateParametersSignature());
+    
+    var ctxMethod = method.withContext(dep -> false);
+    assertThat(ctxMethod.generateParametersSignature())
+        .isEqualTo("CustomSession mySession, Object myObject, Double account");
   }
   
   @Test
   void generatesParametersSignatureWithoutExtraParams() {
-    mockParameters(el, new Parameter(Model.class, "model"), new Parameter(Dto.class, "dto"));
-    assertEquals("", method.generateParametersSignature());
+    mockParameters(el, new Parameter(Model.class, "model"), new Parameter(Long.class, "account"));
+    var ctxMethod = method.withContext(dep -> true);
+    assertEquals("java.lang.Long account", ctxMethod.generateParametersSignature());
   }
   
   @Test
@@ -187,5 +187,38 @@ public class MethodTest {
   void getMethodName() {
     mockMethodName(el, "method1");
     assertEquals("method1", method.getName());
+  }
+  
+  @Test
+  void noTypesOnMissingContext() {
+    mockParameters(el, 
+        new Parameter(Model.class, "model"),
+        new Parameter(Dto.class, "dto"),
+        new Parameter(CustomSession.class, "session"));
+    mockReturnType(el, HttpServletRequest.class.getName());
+    
+    assertThatThrownBy(() -> method.getReturnType())
+        .isInstanceOf(IllegalStateException.class);
+    assertThatThrownBy(() -> method.getDtoType())
+        .isInstanceOf(IllegalStateException.class);
+    assertThatThrownBy(() -> method.getModelType())
+        .isInstanceOf(IllegalStateException.class);
+    assertThatThrownBy(() -> method.generateParametersSignature())
+        .isInstanceOf(IllegalStateException.class);
+  }
+  
+  @Test
+  void getReturnType() {
+    mockReturnType(el, "com.time.Data");
+    
+    var ctxMethod = method.withContext(dep -> false);
+    assertThat(ctxMethod.getReturnType().getName()).isNotNull();
+  }
+  
+  @Test
+  void getModelType() {
+    mockParameters(el, new Parameter(Model.class, "model"));
+    var ctxMethod = method.withContext(dep -> true);
+    assertThat(ctxMethod.getModelType()).isNotNull();
   }
 }

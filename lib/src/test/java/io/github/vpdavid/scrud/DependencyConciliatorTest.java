@@ -23,18 +23,18 @@ public class DependencyConciliatorTest {
         "a.b.c.D",
         "e.f.G",
         "h.i.D"));
-    assertFalse(dc.nameClash("a.b.c.D"));
-    assertTrue(dc.nameClash("h.i.D"));
-    assertFalse(dc.nameClash("e.f.G"));
+    assertFalse(dc.isNameClash("a.b.c.D"));
+    assertTrue(dc.isNameClash("h.i.D"));
+    assertFalse(dc.isNameClash("e.f.G"));
     
     dc.addDependencies(List.of(
         "j.k.l.G",
         "m.n.O",
         "p.q.r.G"));
-    assertTrue(dc.nameClash("j.k.l.G"));
-    assertFalse(dc.nameClash("e.f.G"));
-    assertFalse(dc.nameClash("m.n.O"));
-    assertTrue(dc.nameClash("p.q.r.G"));
+    assertTrue(dc.isNameClash("j.k.l.G"));
+    assertFalse(dc.isNameClash("e.f.G"));
+    assertFalse(dc.isNameClash("m.n.O"));
+    assertTrue(dc.isNameClash("p.q.r.G"));
   }
   
   @Test

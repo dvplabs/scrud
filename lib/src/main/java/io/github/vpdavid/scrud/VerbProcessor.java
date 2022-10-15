@@ -23,11 +23,11 @@ public class VerbProcessor {
   private final Configuration conf;
   private final String templateName;
   
-  public String generateSourceCode(Method method) 
+  public String generateSourceCode(Method method, ConflictDetector conflictDetector) 
       throws MalformedTemplateNameException, ParseException, IOException, TemplateException {
     var template = conf.getTemplate(templateName);
     ByteArrayOutputStream out = new ByteArrayOutputStream();
-    template.process(Map.of("method", method), new PrintWriter(out));
+    template.process(Map.of("method", method.withContext(conflictDetector)), new PrintWriter(out));
     return out.toString();
   }
 }

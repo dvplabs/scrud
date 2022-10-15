@@ -1,5 +1,5 @@
 * (done) Include imports utilized by methods
-* name clash avoiding (Using full name of clashing names)
+* (done) name clash avoiding (Using full name of clashing names)
 * Add @Generated annotation
-* accept resource name with more than one slash
+* accept resource name with more than one slash and containing dash (-) or underscore (_)
 * Support for @Valid and @Validated
