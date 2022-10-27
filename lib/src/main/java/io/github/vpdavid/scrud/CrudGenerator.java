@@ -157,22 +157,19 @@ public class CrudGenerator extends AbstractProcessor {
         clazz.getPackageName() + format(".%sCrudController", className));
     
     var conciliator = new DependencyConciliator();
-    var deps = Stream.of(
+    conciliator.addDependencies(Stream.of(
           BASIC_IMPORTS.stream(),
           methods.stream().flatMap(p -> p.processor.getVerb().getDependencies().stream()),
           methods.stream().flatMap(p -> p.method.getDependencies().stream()))
         .flatMap(Function.identity())
-        .collect(toList());
-    conciliator.addDependencies(deps);
-    
-    conciliator.getNonClashing();
+        .collect(toList()));    
     
     var imports = conciliator.getNonClashing().stream()
         .map(dep -> "import " + dep + ";")
         .sorted()
         .collect(joining("\n"));
 
-    try ( var writer = new PrintWriter(file.openWriter())) {
+    try (var writer = new PrintWriter(file.openWriter())) {
       writer.println(format(PACKAGE_DECLARATION, clazz.getPackageName()));
       writer.println(imports);
       writer.println("");
