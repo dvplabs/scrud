@@ -1,5 +1,7 @@
 * (done) Include imports utilized by methods
 * (done) name clash avoiding (Using full name of clashing names)
-* Add @Generated annotation
+* (done) Add @Generated annotation
 * accept resource name with more than one slash and containing dash (-) or underscore (_)
-* Support for @Valid and @Validated
+* Support for @Valid and @Validated (low priority)
+  - Validation can be implemented at the service level
+  - you can even write validators that make use of repositories and be part of transactions at the service layer

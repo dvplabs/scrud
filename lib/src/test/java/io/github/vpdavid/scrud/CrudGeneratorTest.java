@@ -6,6 +6,12 @@ import static com.google.testing.compile.Compiler.javac;
 import com.google.testing.compile.JavaFileObjects;
 import java.io.File;
 import java.io.IOException;
+import java.time.Clock;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.util.Arrays;
 import java.util.List;
 import static java.util.stream.Collectors.toList;
@@ -66,10 +72,15 @@ public class CrudGeneratorTest {
   }
   
   @Test
-  void avoidsNameClashing() throws IOException {
+  void avoidNameClashing() throws IOException {
     generateController(
         "example/input/mapper/MapperWithClashingDependencies.java", 
         "example/output/ControllerWithClashingDependencies.java");
+  }
+  
+  Clock withFrozenClock() {
+    var fixed = Instant.parse("2022-05-12T22:23:12Z");
+    return Clock.fixed(fixed, ZoneId.systemDefault());
   }
   
   void failsWithMessage(String file, String msg) throws IOException {
@@ -81,7 +92,7 @@ public class CrudGeneratorTest {
         .collect(toList());
     
     Compilation compilation = javac()
-        .withProcessors(new CrudGenerator())
+        .withProcessors(new CrudGenerator(withFrozenClock()))
         .withClasspath(classPath)
         .compile(files);
     
@@ -97,7 +108,7 @@ public class CrudGeneratorTest {
         .collect(toList());
     
     Compilation compilation = javac()
-        .withProcessors(new CrudGenerator())
+        .withProcessors(new CrudGenerator(withFrozenClock()))
         .withClasspath(classPath)
         .compile(files);
     

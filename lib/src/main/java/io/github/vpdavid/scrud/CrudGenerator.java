@@ -9,6 +9,10 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import static java.lang.String.format;
+import java.time.Clock;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -46,12 +50,14 @@ public class CrudGenerator extends AbstractProcessor {
   private final Pattern ENUM_NAME_PATTERN = Pattern.compile("^.*\\.([^.]+)$");
   private final String PACKAGE_DECLARATION = "package %s;\n";
   private final List<String> BASIC_IMPORTS = List.of(
+      "javax.annotation.processing.Generated",
       "org.springframework.web.bind.annotation.RestController",
       "org.springframework.web.bind.annotation.RequestMapping",
       "org.springframework.beans.factory.annotation.Autowired",
       "javax.persistence.EntityManager");
   private final String CLASS_DECLARATION
-      = "@RestController\n"
+      = "@Generated(value = \"io.github.vpdavid.scrud.CrudGenerator\", date = \"%s\")\n"
+      + "@RestController\n"
       + "@RequestMapping(path = \"%s\")\n"
       + "public class %sCrudController {\n"
       + "  @Autowired\n"
@@ -60,9 +66,15 @@ public class CrudGenerator extends AbstractProcessor {
       + "  private %s mapper;\n";
 
   Map<Verb, VerbProcessor> processors = new HashMap<>();
+  private final Clock clock;
 
   public CrudGenerator() throws IOException {
+    this(Clock.systemDefaultZone());
+  }
+  
+  public CrudGenerator(Clock clock) throws IOException {
     super();
+    this.clock = clock;
     var freeMarkerCfg = configFreemarker();
     processors.put(Verb.GET, new VerbProcessor(Verb.GET, freeMarkerCfg, "get.tpl"));
     processors.put(Verb.GET_ALL, new VerbProcessor(Verb.GET_ALL, freeMarkerCfg, "get-all.tpl"));
@@ -173,7 +185,11 @@ public class CrudGenerator extends AbstractProcessor {
       writer.println(format(PACKAGE_DECLARATION, clazz.getPackageName()));
       writer.println(imports);
       writer.println("");
-      writer.println(format(CLASS_DECLARATION, val.resource, className, clazz.getSimpleName()));
+      writer.println(format(CLASS_DECLARATION, 
+          nowFormatted(), 
+          val.resource, 
+          className, 
+          clazz.getSimpleName()));
       
       for (var v : methods) {
         var src = v.processor.generateSourceCode(v.method, conciliator);
@@ -182,6 +198,12 @@ public class CrudGenerator extends AbstractProcessor {
 
       writer.println("}");
     }
+  }
+  
+  private String nowFormatted() {
+    return DateTimeFormatter
+        .ofPattern("yyyy-MM-dd H:m:s")
+        .format(LocalDateTime.now(clock));
   }
 
   private String findResourceName(String resource) {
