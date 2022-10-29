@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @Generated(value = "io.github.vpdavid.scrud.CrudGenerator", date = "2022-05-12 18:23:12")
 @RestController
-@RequestMapping(path = "/v1/products")
+@RequestMapping(path = "/products")
 public class ProductsCrudController {
 
   @Autowired

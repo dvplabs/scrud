@@ -6,7 +6,7 @@ import example.input.dto.ProductDto;
 import io.github.vpdavid.scrud.*;
 import jakarta.servlet.http.HttpServletRequest;
 
-@Crud(resource = "/v1/products", model = Product.class, dto = ProductDto.class)
+@Crud(resource = "/products", model = Product.class, dto = ProductDto.class)
 public interface MapperWithExtraParams {
 
   ProductDto toDto(CustomSession mySession, Product model);

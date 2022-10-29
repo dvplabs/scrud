@@ -13,6 +13,7 @@ import java.time.Clock;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -46,7 +47,6 @@ import lombok.Getter;
 @AutoService(Processor.class)
 public class CrudGenerator extends AbstractProcessor {
 
-  private final Pattern PATH_RESOURCE_NAME_PATTERN = Pattern.compile("^.*/([^/]+)$");
   private final Pattern ENUM_NAME_PATTERN = Pattern.compile("^.*\\.([^.]+)$");
   private final String PACKAGE_DECLARATION = "package %s;\n";
   private final List<String> BASIC_IMPORTS = List.of(
@@ -207,11 +207,15 @@ public class CrudGenerator extends AbstractProcessor {
   }
 
   private String findResourceName(String resource) {
-    var matcher = PATH_RESOURCE_NAME_PATTERN.matcher(resource);
-    matcher.find();
-    var resourceName = matcher.group(1);
-    String className = resourceName.substring(0, 1).toUpperCase() + resourceName.substring(1);
-    return className;
+    return Arrays.stream(resource.split("/"))
+        .map(s -> s.replaceAll("^[0-9]+", ""))
+        .filter(s -> s.length() > 0)
+        .map(this::capitalize)
+        .collect(joining());
+  }
+  
+  private String capitalize(String input) {
+    return input.substring(0, 1).toUpperCase() + input.substring(1);
   }
   
   private Verb getEnumName(String clazz) {

@@ -78,6 +78,14 @@ public class CrudGeneratorTest {
         "example/output/ControllerWithClashingDependencies.java");
   }
   
+  @Test
+  void longResourcePath() throws IOException {
+    generateController(
+        "example/input/mapper/LongResourcePath.java",
+        "example/output/LongResourcePathController.java",
+        "example.input.mapper.LiveV1InfoCrudController");
+  }
+  
   Clock withFrozenClock() {
     var fixed = Instant.parse("2022-05-12T22:23:12Z");
     return Clock.fixed(fixed, ZoneId.systemDefault());
@@ -100,6 +108,10 @@ public class CrudGeneratorTest {
   }
   
   void generateController(String mapperPath, String resultPath) throws IOException {
+    generateController(mapperPath, resultPath, "example.input.mapper.ProductsCrudController");
+  }
+  
+  void generateController(String mapperPath, String resultPath, String expectedClass) throws IOException {
     var files = Stream.of(
           "example/input/model/Product.java", 
           "example/input/dto/ProductDto.java",
@@ -113,7 +125,7 @@ public class CrudGeneratorTest {
         .compile(files);
     
     assertThat(compilation)
-        .generatedSourceFile("example.input.mapper.ProductsCrudController")
+        .generatedSourceFile(expectedClass)
         .hasSourceEquivalentTo(JavaFileObjects.forResource(resultPath));
   }
 }

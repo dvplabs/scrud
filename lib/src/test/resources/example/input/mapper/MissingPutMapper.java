@@ -5,7 +5,7 @@ import example.input.model.Product;
 import io.github.vpdavid.scrud.Crud;
 import io.github.vpdavid.scrud.Verb;
 
-@Crud(resource = "/v1/products", model = Product.class, dto = ProductDto.class, verbs = {Verb.PUT})
+@Crud(resource = "/products", model = Product.class, dto = ProductDto.class, verbs = {Verb.PUT})
 public interface MissingPutMapper {
   ProductDto toDto(Product model);
 }
