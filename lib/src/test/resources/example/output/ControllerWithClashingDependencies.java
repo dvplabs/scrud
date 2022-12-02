@@ -24,7 +24,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
-@Generated(value = "io.github.vpdavid.scrud.CrudGenerator", date = "2022-05-12 18:23:12")
+@Generated(value = "io.github.dvplabs.scrud.CrudGenerator", date = "2022-05-12 18:23:12")
 @RestController
 @RequestMapping(path = "/products")
 public class ProductsCrudController {
@@ -84,7 +84,7 @@ public class ProductsCrudController {
   @PostMapping
   @ResponseStatus(HttpStatus.CREATED)
   @Transactional
-  public void create(@RequestBody example.input.dto.Product myDto, io.github.vpdavid.scrud.util.PutMapping data) {
+  public void create(@RequestBody example.input.dto.Product myDto, io.github.dvplabs.scrud.util.PutMapping data) {
     var myModel = new Product();
     mapper.updateEntity(myModel, myDto, data);
     entityManager.persist(myModel);
@@ -93,7 +93,7 @@ public class ProductsCrudController {
   @PutMapping(path = "/{id}")
   @ResponseStatus(HttpStatus.OK)
   @Transactional
-  public void update(@RequestBody example.input.dto.Product myDto, @PathVariable Long id, io.github.vpdavid.scrud.util.PutMapping data) {
+  public void update(@RequestBody example.input.dto.Product myDto, @PathVariable Long id, io.github.dvplabs.scrud.util.PutMapping data) {
     var myModel = entityManager.find(Product.class, id);
     if (Objects.isNull(myModel)) {
       throw new EntityNotFoundException("Entity not found");

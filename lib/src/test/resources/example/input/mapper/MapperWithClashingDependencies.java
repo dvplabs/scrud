@@ -1,7 +1,7 @@
 package example.input.mapper;
 
-import io.github.vpdavid.scrud.*;
-import io.github.vpdavid.scrud.util.PutMapping;
+import io.github.dvplabs.scrud.Crud;
+import io.github.dvplabs.scrud.util.PutMapping;
 
 @Crud(resource = "/products",  
     model = example.input.model.Product.class, 

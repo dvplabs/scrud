@@ -1,9 +1,9 @@
 package example.input.mapper;
 
-import io.github.vpdavid.scrud.util.CustomSession;
+import io.github.dvplabs.scrud.Crud;
+import io.github.dvplabs.scrud.util.CustomSession;
 import example.input.model.Product;
 import example.input.dto.ProductDto;
-import io.github.vpdavid.scrud.*;
 import jakarta.servlet.http.HttpServletRequest;
 
 @Crud(resource = "/products", model = Product.class, dto = ProductDto.class)

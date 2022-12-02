@@ -25,7 +25,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
-@Generated(value = "io.github.vpdavid.scrud.CrudGenerator", date = "2022-05-12 18:23:12")
+@Generated(value = "io.github.dvplabs.scrud.CrudGenerator", date = "2022-05-12 18:23:12")
 @RestController
 @RequestMapping(path = "/products")
 public class ProductsCrudController {
