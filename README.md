@@ -5,7 +5,7 @@ You just need to annotate a mapper (which is a bean that maps an entity into a d
 
     @Component
     @Crud(resource = "/products", model = Product.class, dto = ProductDto.class)
-    public interface ProductMapper {
+    public class ProductMapper {
   
       public ProductDto toDto(Product model) {
         //Code to map Product into ProductDto.
